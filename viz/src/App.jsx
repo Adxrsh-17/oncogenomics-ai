@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef } from 'react'
-import GenomeScene from './GenomeScene'
 import { runPipeline } from './pipeline'
 import RAW_VARIANTS from './variants_data.json'
 import './App.css'
@@ -27,10 +26,212 @@ const GPU_DATA = {
   cpu_s: 10.64,
   gpu_projected_s: 0.22,
   speedup: 48,
-  wgs_cpu_h: 35.5,
-  wgs_gpu_h: 0.74,
+  wgs_cpu_h: 36.0,
+  wgs_gpu_h: 0.63,
   gflops: 69,
   gpu: 'NVIDIA A10G',
+}
+
+// Real data from our Python pipeline runs
+const COHORT = {
+  patients: 198,
+  raw_mutations: 62146,
+  after_qc: 62146,
+  retention_pct: 100,
+  kras_g12c: 21,
+  egfr_l858r: 8,
+  target_union: 29,
+  median_tmb: 212,
+  ml_scored: 5000,
+  actionable: 29,
+}
+
+const TOP_GENES = [
+  { gene: 'TP53',    n: 103, pct: 52.0, color: '#f85149' },
+  { gene: 'KRAS',    n: 61,  pct: 30.8, color: '#58a6ff' },
+  { gene: 'EGFR',    n: 38,  pct: 19.2, color: '#3fb950' },
+  { gene: 'KEAP1',   n: 34,  pct: 17.2, color: '#bc8cff' },
+  { gene: 'SMARCA4', n: 23,  pct: 11.6, color: '#bc8cff' },
+  { gene: 'STK11',   n: 23,  pct: 11.6, color: '#58a6ff' },
+  { gene: 'ALK',     n: 23,  pct: 11.6, color: '#3fb950' },
+  { gene: 'NTRK3',   n: 21,  pct: 10.6, color: '#3fb950' },
+  { gene: 'BRAF',    n: 21,  pct: 10.6, color: '#58a6ff' },
+  { gene: 'NF1',     n: 20,  pct: 10.1, color: '#58a6ff' },
+  { gene: 'ATM',     n: 17,  pct:  8.6, color: '#e3b341' },
+  { gene: 'PIK3CA',  n: 16,  pct:  8.1, color: '#ff7b72' },
+  { gene: 'TTN',     n: 15,  pct:  7.6, color: '#768390' },
+  { gene: 'BRCA2',   n: 14,  pct:  7.1, color: '#e3b341' },
+  { gene: 'ARID1A',  n: 11,  pct:  5.6, color: '#bc8cff' },
+]
+
+const MUT_TYPES = [
+  { type: 'Missense',        n: 3208, pct: 64.2, color: '#58a6ff' },
+  { type: 'Nonsense',        n: 659,  pct: 13.2, color: '#f85149' },
+  { type: 'Frameshift Del',  n: 633,  pct: 12.7, color: '#e3b341' },
+  { type: 'Frameshift Ins',  n: 214,  pct:  4.3, color: '#ff7b72' },
+  { type: 'Splice Site',     n: 191,  pct:  3.8, color: '#bc8cff' },
+  { type: 'Other',           n:  95,  pct:  1.9, color: '#768390' },
+]
+
+const PATHWAY_DATA = [
+  { name: 'Cell Cycle',  pts: 116, pct: 58.6, top: 'TP53',    n: 100, col: '#f85149' },
+  { name: 'RAS/MAPK',   pts: 95,  pct: 48.0, top: 'KRAS',    n: 58,  col: '#58a6ff' },
+  { name: 'RTK/Growth', pts: 70,  pct: 35.4, top: 'EGFR',    n: 31,  col: '#3fb950' },
+  { name: 'Chromatin',  pts: 66,  pct: 33.3, top: 'SMARCA4', n: 21,  col: '#bc8cff' },
+  { name: 'PI3K/AKT',  pts: 41,  pct: 20.7, top: 'PIK3CA',  n: 15,  col: '#ff7b72' },
+  { name: 'DNA Repair', pts: 39,  pct: 19.7, top: 'BRCA2',   n: 13,  col: '#e3b341' },
+  { name: 'Wnt',        pts: 25,  pct: 12.6, top: 'APC',     n: 13,  col: '#39d0d8' },
+]
+
+const RF_FEATURES = [
+  { feat: 'driver_tier',       imp: 83.0, col: '#58a6ff' },
+  { feat: 'is_hotspot',        imp:  9.4, col: '#3fb950' },
+  { feat: 'consequence_score', imp:  5.0, col: '#bc8cff' },
+  { feat: 'depth',             imp:  1.1, col: '#e3b341' },
+  { feat: 'vaf',               imp:  1.1, col: '#ff7b72' },
+  { feat: 'is_snv',            imp:  0.3, col: '#39d0d8' },
+  { feat: 'clonality_score',   imp:  0.1, col: '#768390' },
+]
+
+const VAF_BINS = [
+  { bin: '0–20%',  n: 112, pct: 2.2  },
+  { bin: '20–30%', n: 456, pct: 9.1  },
+  { bin: '30–40%', n: 1102, pct: 22.0 },
+  { bin: '40–50%', n: 1543, pct: 30.9 },
+  { bin: '50–60%', n: 1008, pct: 20.2 },
+  { bin: '60%+',   n: 779, pct: 15.6 },
+]
+
+// Inline bar chart component
+function HBar({ label, val, max, pct, color, right }) {
+  const w = Math.max(2, (val / max) * 100)
+  return (
+    <div className="hbar-row">
+      <span className="hbar-label">{label}</span>
+      <div className="hbar-track">
+        <div className="hbar-fill" style={{ width: `${w}%`, background: color }} />
+      </div>
+      <span className="hbar-val">{right}</span>
+    </div>
+  )
+}
+
+function CohortPanel() {
+  return (
+    <div className="panel">
+      <div className="panel-header">
+        <h2>Cohort Analysis — TCGA-LUAD</h2>
+        <span className="panel-sub">
+          {COHORT.patients} patients · {COHORT.raw_mutations.toLocaleString()} somatic mutations · {COHORT.ml_scored.toLocaleString()} ML-scored · GDC open-access MAF
+        </span>
+      </div>
+
+      {/* KPI row */}
+      <div className="bench-grid" style={{ marginBottom: 16 }}>
+        {[
+          { label: 'Patients', val: COHORT.patients, sub: 'TCGA-LUAD cohort', col: 'blue' },
+          { label: 'Somatic Mutations', val: COHORT.raw_mutations.toLocaleString(), sub: 'after QC (100% retained)', col: 'green' },
+          { label: 'ML Scored', val: COHORT.ml_scored.toLocaleString(), sub: 'RF + XGBoost, AUC 1.0', col: 'purple' },
+          { label: 'KRAS G12C', val: COHORT.kras_g12c, sub: `${(COHORT.kras_g12c/COHORT.patients*100).toFixed(1)}% of patients`, col: 'blue' },
+          { label: 'EGFR L858R', val: COHORT.egfr_l858r, sub: `${(COHORT.egfr_l858r/COHORT.patients*100).toFixed(1)}% of patients`, col: 'green' },
+          { label: 'Actionable', val: COHORT.actionable, sub: 'variants with FDA/trial drug', col: 'orange' },
+        ].map(k => (
+          <div key={k.label} className="kpi-card">
+            <div className="kpi-label">{k.label}</div>
+            <div className={`kpi-val ${k.col}`}>{k.val}</div>
+            <div className="kpi-sub">{k.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="charts-grid">
+
+        {/* Top mutated genes */}
+        <div className="bench-card span2">
+          <div className="bench-title">Top Mutated Genes — 5,000 scored variants</div>
+          {TOP_GENES.map(g => (
+            <HBar key={g.gene} label={g.gene} val={g.n} max={103}
+              color={g.color}
+              right={<><strong style={{ color: g.color }}>{g.n}</strong><span className="hbar-pct">{g.pct}%</span></>}
+            />
+          ))}
+        </div>
+
+        {/* Pathway alteration freq */}
+        <div className="bench-card">
+          <div className="bench-title">Pathway Alteration — 198 patients</div>
+          {PATHWAY_DATA.map(p => (
+            <HBar key={p.name} label={p.name} val={p.pct} max={60}
+              color={p.col}
+              right={<><strong style={{ color: p.col }}>{p.pct}%</strong><span className="hbar-pct">{p.pts} pts · {p.top}</span></>}
+            />
+          ))}
+        </div>
+
+        {/* Mutation types */}
+        <div className="bench-card">
+          <div className="bench-title">Variant Classification — 5,000 variants</div>
+          {MUT_TYPES.map(m => (
+            <HBar key={m.type} label={m.type} val={m.pct} max={65}
+              color={m.color}
+              right={<><strong style={{ color: m.color }}>{m.pct}%</strong><span className="hbar-pct">{m.n.toLocaleString()}</span></>}
+            />
+          ))}
+        </div>
+
+        {/* VAF distribution */}
+        <div className="bench-card">
+          <div className="bench-title">VAF Distribution — mean 44.7% · median 44.2%</div>
+          {VAF_BINS.map(b => (
+            <HBar key={b.bin} label={b.bin} val={b.pct} max={32}
+              color="#58a6ff"
+              right={<><strong style={{ color: '#58a6ff' }}>{b.pct}%</strong><span className="hbar-pct">{b.n.toLocaleString()} vars</span></>}
+            />
+          ))}
+          <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 8 }}>
+            High median VAF (44%) consistent with clonal tumor mutations. Low-VAF tail (&lt;20%) represents potential subclonal events.
+          </div>
+        </div>
+
+        {/* RF Feature importance */}
+        <div className="bench-card">
+          <div className="bench-title">RF Feature Importance — AUC 1.0 on 62,146 variants</div>
+          {RF_FEATURES.map(f => (
+            <HBar key={f.feat} label={f.feat} val={f.imp} max={83}
+              color={f.col}
+              right={<strong style={{ color: f.col }}>{f.imp}%</strong>}
+            />
+          ))}
+          <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 8 }}>
+            driver_tier dominates (83%) — biological prior from COSMIC/OncoKB. is_hotspot (9.4%) captures recurrent positions. VAF/depth contribute minimally to ranking.
+          </div>
+        </div>
+
+        {/* Target patient summary */}
+        <div className="bench-card">
+          <div className="bench-title">Target Patient Selection — Branch A Output</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+            {[
+              { label: 'KRAS p.G12C', n: 21, coord: 'chr12:25,245,351', col: '#58a6ff', drug: 'Sotorasib' },
+              { label: 'EGFR p.L858R', n: 8, coord: 'chr7:55,191,822',  col: '#3fb950', drug: 'Osimertinib' },
+            ].map(t => (
+              <div key={t.label} className="detail-cell" style={{ borderLeft: `2px solid ${t.col}` }}>
+                <span style={{ color: t.col, fontWeight: 700, fontSize: 12 }}>{t.label}</span>
+                <span style={{ display: 'block', fontSize: 11, color: 'var(--text)', marginTop: 2 }}>{t.n} patients</span>
+                <span style={{ display: 'block', fontSize: 10, color: 'var(--muted)' }}>{t.coord}</span>
+                <span style={{ display: 'block', fontSize: 10, color: 'var(--orange)', marginTop: 2 }}>{t.drug} · FDA-approved</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ background: 'var(--surface2)', borderRadius: 6, padding: '8px 10px', fontSize: 11, color: 'var(--dim)', lineHeight: 1.6 }}>
+            <strong style={{ color: 'var(--text)' }}>Union target cohort: {COHORT.target_union} patients</strong><br/>
+            KRAS G12C + EGFR L858R (deduplicated). Selected for Branch B GPU re-calling with Parabricks Mutect2. Median mutation burden: {COHORT.median_tmb} mut/patient.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  )
 }
 
 export default function App() {
@@ -88,7 +289,7 @@ export default function App() {
       setTimeout(() => { logRef.current?.scrollTo(0, logRef.current.scrollHeight) }, 10)
     }
 
-    addLog(`Starting pipeline on ${toProcess.length} variants…`, 'start')
+    addLog(`Starting pipeline on ${toProcess.length} variants (from ${COHORT.raw_mutations.toLocaleString()} total processed)…`, 'start')
 
     try {
       const results = await runPipeline(toProcess, (evt) => {
@@ -117,7 +318,6 @@ export default function App() {
   }
 
   const actionableScored = scoredVariants.filter(v => v.drug)
-  const topScored = scoredVariants.slice(0, 15)
 
   return (
     <div className="app">
@@ -127,18 +327,18 @@ export default function App() {
           <div className="logo-icon">⬡</div>
           <div>
             <div className="logo-title">OncoSeq-AI</div>
-            <div className="logo-sub">TCGA-LUAD · 566 patients</div>
+            <div className="logo-sub">TCGA-LUAD · {COHORT.patients} patients</div>
           </div>
         </div>
 
         <div className="nav-section">
           <div className="nav-label">VIEWS</div>
-          {['pipeline','genome','benchmark','results'].map(t => (
+          {['pipeline','cohort','benchmark','results'].map(t => (
             <button key={t} className={`nav-btn ${tab===t?'active':''}`} onClick={()=>setTab(t)}>
               <span className="nav-icon">{
-                t==='pipeline'?'◈':t==='genome'?'⬡':t==='benchmark'?'⚡':'◉'
+                t==='pipeline'?'◈':t==='cohort'?'◉':t==='benchmark'?'⚡':'▦'
               }</span>
-              {t==='pipeline'?'Pipeline':t==='genome'?'3D Genome':t==='benchmark'?'GPU Benchmark':'Results'}
+              {t==='pipeline'?'Pipeline':t==='cohort'?'Cohort Analysis':t==='benchmark'?'GPU Benchmark':'Results'}
             </button>
           ))}
         </div>
@@ -156,7 +356,7 @@ export default function App() {
         <div className="nav-section">
           <div className="nav-label">SELECTION ({selectedVariants.length}/20)</div>
           {selectedVariants.length === 0
-            ? <div className="empty-sel">Click variants to select,<br/>or run on full dataset</div>
+            ? <div className="empty-sel">Click variants to select,<br/>or run on full set</div>
             : selectedVariants.map((v,i) => (
               <div key={i} className="sel-chip" onClick={()=>toggleSelect(v)}>
                 <span style={{color: PATHWAY_COLORS[v.pathway]||'#58a6ff'}}>{v.gene}</span>
@@ -187,8 +387,10 @@ export default function App() {
         {tab === 'pipeline' && (
           <div className="panel">
             <div className="panel-header">
-              <h2>Variant Processing Pipeline</h2>
-              <span className="panel-sub">Real TCGA-LUAD data · local execution · RF + XGBoost scoring</span>
+              <h2>Variant Interpretation Pipeline</h2>
+              <span className="panel-sub">
+                Showing <strong style={{color:'var(--accent)'}}>{RAW_VARIANTS.length} representative variants</strong> drawn from {COHORT.ml_scored.toLocaleString()} ML-scored variants ({COHORT.raw_mutations.toLocaleString()} total somatic mutations · {COHORT.patients} patients) · RF + XGBoost scoring · local execution
+              </span>
             </div>
 
             {/* Step progress */}
@@ -218,7 +420,10 @@ export default function App() {
                 {pipelineLog.length === 0 ? (
                   <div className="log-empty">
                     Select variants from the table below, then click <strong>Run Pipeline</strong>.<br/>
-                    Leave selection empty to run on all {RAW_VARIANTS.length} loaded variants.
+                    Leave selection empty to run on all {RAW_VARIANTS.length} loaded variants.<br/>
+                    <span style={{color:'var(--muted)',fontSize:10}}>
+                      These {RAW_VARIANTS.length} variants are a curated subset of {COHORT.ml_scored.toLocaleString()} that were scored offline across {COHORT.raw_mutations.toLocaleString()} mutations from {COHORT.patients} TCGA-LUAD patients.
+                    </span>
                   </div>
                 ) : pipelineLog.map((e,i) => (
                   <div key={i} className={`log-line log-${e.type}`}>
@@ -308,45 +513,8 @@ export default function App() {
           </div>
         )}
 
-        {/* GENOME TAB */}
-        {tab === 'genome' && (
-          <div className="panel genome-panel">
-            <div className="panel-header">
-              <h2>3D Genome View</h2>
-              <span className="panel-sub">
-                {displayVariants.length} variants on human karyotype · Click any dot to inspect
-              </span>
-            </div>
-            <div className="genome-canvas">
-              <GenomeScene
-                variants={displayVariants}
-                selectedGene={selectedGene}
-                onVariantClick={handleVariantClick}
-                processing={processing}
-              />
-              <div className="genome-legend">
-                {Object.entries(PATHWAY_COLORS).map(([p,c]) => (
-                  <div key={p} className="legend-item">
-                    <span className="legend-dot" style={{background:c}} />
-                    <span>{p}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="genome-hint">Drag · Scroll to zoom · Click variant dots</div>
-            </div>
-            {activeVariant && (
-              <div className="genome-detail">
-                <strong style={{color: PATHWAY_COLORS[activeVariant.pathway]||'#58a6ff'}}>
-                  {activeVariant.gene} {activeVariant.hgvsp}
-                </strong>
-                <span>chr{activeVariant.chr}:{activeVariant.pos?.toLocaleString()}</span>
-                <span>VAF {(activeVariant.vaf*100).toFixed(1)}%</span>
-                <span>Score {(activeVariant.ensemble_score||0).toFixed(3)}</span>
-                {activeVariant.drug && <span className="pill fda">{activeVariant.drug}</span>}
-              </div>
-            )}
-          </div>
-        )}
+        {/* COHORT ANALYSIS TAB */}
+        {tab === 'cohort' && <CohortPanel />}
 
         {/* BENCHMARK TAB */}
         {tab === 'benchmark' && (
@@ -379,7 +547,7 @@ export default function App() {
               <div className="kpi-card">
                 <div className="kpi-label">WGS GPU Est.</div>
                 <div className="kpi-val green">{GPU_DATA.wgs_gpu_h}h</div>
-                <div className="kpi-sub">48× projected</div>
+                <div className="kpi-sub">from literature (O'Connell 2023)</div>
               </div>
               <div className="kpi-card">
                 <div className="kpi-label">GPU Verified</div>
@@ -409,13 +577,13 @@ export default function App() {
                 <div className="bench-bar-row">
                   <span>CPU</span>
                   <div className="bench-track">
-                    <div className="bench-fill cpu" style={{width:'100%'}}>35.5 hours</div>
+                    <div className="bench-fill cpu" style={{width:'100%'}}>36 hours</div>
                   </div>
                 </div>
                 <div className="bench-bar-row">
                   <span>GPU</span>
                   <div className="bench-track">
-                    <div className="bench-fill gpu" style={{width:'2.1%'}}>0.74h</div>
+                    <div className="bench-fill gpu" style={{width:'1.75%'}}>0.63h</div>
                   </div>
                 </div>
               </div>
@@ -425,10 +593,10 @@ export default function App() {
               <strong>⚠ Parabricks direct run blocked:</strong> pbrun 4.3.1-1 was successfully extracted from
               nvcr.io container layer (1.8 GB, no Docker). Runtime failed: GLIBC 2.34 required,
               SageMaker Ubuntu 20.04 has 2.31. GPU confirmed active: A10G 69 GFLOPS FP32 via PyTorch.
-              CPU timing (10.64s/50kb) is real and measured on the same A10G instance under CPU-only execution.
+              CPU timing (10.64s/50kb) is real and measured on the same A10G instance.
+              WGS speedup (56.8×) sourced from O'Connell et al. BMC Bioinformatics 24:221, 2023.
             </div>
 
-            {/* Real-ref benchmark table */}
             <div className="bench-card" style={{marginTop:16}}>
               <div className="bench-title">chr17 Real-Reference Benchmark — 5 Regions</div>
               <div className="table-wrap">
@@ -465,17 +633,17 @@ export default function App() {
         {tab === 'results' && (
           <div className="panel">
             <div className="panel-header">
-              <h2>Pipeline Results — 566 Patients</h2>
-              <span className="panel-sub">Full TCGA-LUAD cohort · GDC open access MAF</span>
+              <h2>Pipeline Results — {COHORT.patients} Patients</h2>
+              <span className="panel-sub">Full TCGA-LUAD cohort · GDC open access MAF · Branch A complete</span>
             </div>
             <div className="results-kpi">
               {[
-                {label:'Patients',  val:'566',    sub:'GDC TCGA-LUAD',  col:'blue'},
-                {label:'Mutations', val:'180K',   sub:'somatic SNV/indel', col:'green'},
-                {label:'KRAS G12C', val:'24.6%',  sub:'139 patients',   col:'blue'},
-                {label:'EGFR L858R',val:'3.9%',   sub:'22 patients',    col:'green'},
-                {label:'Actionable',val:'29',      sub:'ML-identified',  col:'orange'},
-                {label:'Median TMB',val:'205',     sub:'mut/patient',    col:'red'},
+                {label:'Patients',    val: COHORT.patients,                   sub:'GDC TCGA-LUAD',          col:'blue'},
+                {label:'Mutations',   val: COHORT.raw_mutations.toLocaleString(), sub:'somatic SNV/indel after QC', col:'green'},
+                {label:'KRAS G12C',   val:`${COHORT.kras_g12c}`,              sub:`${(COHORT.kras_g12c/COHORT.patients*100).toFixed(1)}% patients`, col:'blue'},
+                {label:'EGFR L858R',  val:`${COHORT.egfr_l858r}`,             sub:`${(COHORT.egfr_l858r/COHORT.patients*100).toFixed(1)}% patients`, col:'green'},
+                {label:'Actionable',  val:`${COHORT.actionable}`,              sub:'ML-identified variants',  col:'orange'},
+                {label:'Median TMB',  val:`${COHORT.median_tmb}`,             sub:'mut/patient',             col:'red'},
               ].map(k => (
                 <div key={k.label} className="kpi-card">
                   <div className="kpi-label">{k.label}</div>
@@ -485,30 +653,20 @@ export default function App() {
               ))}
             </div>
 
-            {/* Pathway bars */}
             <div className="bench-card">
               <div className="bench-title">Pathway Alteration Frequencies</div>
-              {[
-                {name:'Cell Cycle', pct:54.6, n:309, top:'TP53', col:'#f85149'},
-                {name:'RAS/MAPK',  pct:45.6, n:258, top:'KRAS', col:'#58a6ff'},
-                {name:'RTK/Growth',pct:39.9, n:226, top:'EGFR', col:'#3fb950'},
-                {name:'Chromatin', pct:36.0, n:204, top:'KMT2C',col:'#bc8cff'},
-                {name:'DNA Repair',pct:27.6, n:156, top:'ATM',  col:'#e3b341'},
-                {name:'PI3K/AKT', pct:18.6, n:105, top:'MTOR', col:'#ff7b72'},
-                {name:'Wnt',      pct:14.1, n:80,  top:'APC',  col:'#39d0d8'},
-              ].map(p => (
+              {PATHWAY_DATA.map(p => (
                 <div key={p.name} className="pw-bar-row">
                   <span className="pw-name">{p.name}</span>
                   <div className="pw-track">
                     <div className="pw-fill" style={{width:`${p.pct}%`, background:p.col}} />
                   </div>
                   <span className="pw-pct">{p.pct}%</span>
-                  <span className="pw-top">{p.n} pts · {p.top}</span>
+                  <span className="pw-top">{p.pts} pts · {p.top}</span>
                 </div>
               ))}
             </div>
 
-            {/* Actionable variants */}
             {scoredVariants.length > 0 && (
               <div className="bench-card">
                 <div className="bench-title">

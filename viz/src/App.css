@@ -247,3 +247,23 @@ html, body, #root { height: 100%; background: var(--bg); color: var(--text); }
 .pw-top { width: 110px; font-size: 10px; color: var(--muted); }
 
 .run-prompt { padding: 30px; text-align: center; color: var(--muted); line-height: 2; }
+
+/* Cohort analysis charts */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.charts-grid .span2 { grid-column: span 2; }
+
+.hbar-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 7px; font-size: 11px;
+}
+.hbar-label { width: 110px; flex-shrink: 0; color: var(--dim); font-family: monospace; }
+.hbar-track { flex: 1; height: 12px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.hbar-fill { height: 100%; border-radius: 3px; opacity: 0.75; transition: width .3s; }
+.hbar-val { display: flex; align-items: center; gap: 6px; min-width: 90px; justify-content: flex-end; }
+.hbar-pct { color: var(--muted); font-size: 10px; }
+
+.kpi-val.purple { color: var(--purple); }
