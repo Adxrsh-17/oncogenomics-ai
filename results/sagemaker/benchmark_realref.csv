@@ -1,0 +1,6 @@
+gene_region,region,elapsed_s,success,n_pass_variants,key_mutation_detected,mean_af
+TP53,chr17:7565000-7615000,10.57,True,1,True,0.022
+BRCA1,chr17:43044000-43094000,10.5,True,1,True,0.02
+NF1,chr17:31050000-31100000,10.6,True,0,False,
+ERBB2,chr17:37840000-37890000,10.36,True,1,True,0.022
+CDH1,chr17:39656000-39706000,11.17,True,0,False,

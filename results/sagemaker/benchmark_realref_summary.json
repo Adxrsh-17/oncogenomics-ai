@@ -1,0 +1,60 @@
+{
+  "benchmark_mode": "real_reference_chr17_tumor_normal",
+  "reference": "GRCh38 chr17 (hg38)",
+  "mutations": "TCGA-LUAD chr17 missense + gene hotspots",
+  "regions_tested": 5,
+  "regions_success": 5,
+  "key_mutation_recall": "3/5",
+  "mean_cpu_s_per_region": 10.64,
+  "wgs_cpu_hours_estimated": 189.2,
+  "parabricks_hours_projected": 3.33,
+  "speedup_reference": "O'Connell et al. BMC Bioinformatics 24:221 2023 (56.8x on TCGA WGS)",
+  "gpu": "NVIDIA A10G 23GB \u2014 validated GPU environment",
+  "per_region": [
+    {
+      "gene_region": "TP53",
+      "region": "chr17:7565000-7615000",
+      "elapsed_s": 10.57,
+      "success": true,
+      "n_pass_variants": 1,
+      "key_mutation_detected": true,
+      "mean_af": 0.022
+    },
+    {
+      "gene_region": "BRCA1",
+      "region": "chr17:43044000-43094000",
+      "elapsed_s": 10.5,
+      "success": true,
+      "n_pass_variants": 1,
+      "key_mutation_detected": true,
+      "mean_af": 0.02
+    },
+    {
+      "gene_region": "NF1",
+      "region": "chr17:31050000-31100000",
+      "elapsed_s": 10.6,
+      "success": true,
+      "n_pass_variants": 0,
+      "key_mutation_detected": false,
+      "mean_af": null
+    },
+    {
+      "gene_region": "ERBB2",
+      "region": "chr17:37840000-37890000",
+      "elapsed_s": 10.36,
+      "success": true,
+      "n_pass_variants": 1,
+      "key_mutation_detected": true,
+      "mean_af": 0.022
+    },
+    {
+      "gene_region": "CDH1",
+      "region": "chr17:39656000-39706000",
+      "elapsed_s": 11.17,
+      "success": true,
+      "n_pass_variants": 0,
+      "key_mutation_detected": false,
+      "mean_af": null
+    }
+  ]
+}

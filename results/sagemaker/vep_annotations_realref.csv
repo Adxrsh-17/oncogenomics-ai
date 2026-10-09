@@ -1,0 +1,4 @@
+chrom,pos,ref,alt,filter,af,depth,gene,consequence
+chr17,7577535,A,T,PASS,0.022,44,CD68,3_prime_UTR_variant
+chr17,43063930,C,A,PASS,0.02,48,BRCA1,missense_variant
+chr17,37880982,A,G,PASS,0.022,43,YWHAEP7,splice_polypyrimidine_tract_variant

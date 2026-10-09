@@ -1,0 +1,62 @@
+{
+  "cohort": "TCGA-LUAD full open-access",
+  "total_patients": 566,
+  "total_mutations": 180376,
+  "median_mutation_burden": 205,
+  "kras_g12c_patients": 139,
+  "kras_g12c_pct": 24.6,
+  "egfr_l858r_patients": 22,
+  "egfr_l858r_pct": 3.9,
+  "target_cohort_union": 161,
+  "pathway_summary": [
+    {
+      "Pathway": "Cell Cycle",
+      "Patients": 309,
+      "Pct": 54.6,
+      "Top_Gene": "TP53",
+      "Top_Gene_N": 303
+    },
+    {
+      "Pathway": "RAS/MAPK",
+      "Patients": 258,
+      "Pct": 45.6,
+      "Top_Gene": "KRAS",
+      "Top_Gene_N": 150
+    },
+    {
+      "Pathway": "RTK/Growth",
+      "Patients": 226,
+      "Pct": 39.9,
+      "Top_Gene": "EGFR",
+      "Top_Gene_N": 103
+    },
+    {
+      "Pathway": "Chromatin",
+      "Patients": 204,
+      "Pct": 36.0,
+      "Top_Gene": "KMT2C",
+      "Top_Gene_N": 63
+    },
+    {
+      "Pathway": "DNA Repair",
+      "Patients": 156,
+      "Pct": 27.6,
+      "Top_Gene": "ATM",
+      "Top_Gene_N": 47
+    },
+    {
+      "Pathway": "PI3K/AKT",
+      "Patients": 105,
+      "Pct": 18.6,
+      "Top_Gene": "MTOR",
+      "Top_Gene_N": 35
+    },
+    {
+      "Pathway": "Wnt",
+      "Patients": 80,
+      "Pct": 14.1,
+      "Top_Gene": "APC",
+      "Top_Gene_N": 34
+    }
+  ]
+}

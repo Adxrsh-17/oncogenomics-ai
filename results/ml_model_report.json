@@ -1,0 +1,37 @@
+{
+  "rf_cv_auc": 1.0,
+  "xgb_cv_auc": 1.0,
+  "n_variants": 62146,
+  "n_positive_class": 449,
+  "features": [
+    "vaf",
+    "depth",
+    "consequence_score",
+    "driver_tier",
+    "clonality_score",
+    "is_snv",
+    "is_hotspot",
+    "pop_af"
+  ],
+  "rf_feature_importance": {
+    "vaf": 0.0107,
+    "depth": 0.0111,
+    "consequence_score": 0.0497,
+    "driver_tier": 0.8302,
+    "clonality_score": 0.001,
+    "is_snv": 0.0033,
+    "is_hotspot": 0.0941,
+    "pop_af": 0.0
+  },
+  "xgb_feature_importance": {
+    "vaf": 0.0,
+    "depth": 0.0,
+    "consequence_score": 0.1325,
+    "driver_tier": 0.8675,
+    "clonality_score": 0.0,
+    "is_snv": 0.0,
+    "is_hotspot": 0.0,
+    "pop_af": 0.0
+  },
+  "actionable_variants_found": 29
+}
