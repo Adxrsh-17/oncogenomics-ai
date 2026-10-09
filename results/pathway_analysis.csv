@@ -1,0 +1,8 @@
+Pathway,Patients,Pct,Top_Gene,Top_Gene_N
+Cell Cycle,116,58.6,TP53,100
+RAS/MAPK,95,48.0,KRAS,58
+RTK/Growth,70,35.4,EGFR,31
+Chromatin,66,33.3,SMARCA4,21
+PI3K/AKT,41,20.7,PIK3CA,15
+DNA Repair,39,19.7,BRCA2,13
+Wnt,25,12.6,APC,13

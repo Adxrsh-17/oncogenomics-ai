@@ -1,0 +1,23 @@
+{
+  "mean_cpu_s_per_region": 4.99,
+  "wgs_cpu_hours": 36.0,
+  "parabricks_hours": 0.63,
+  "parabricks_minutes": 38.0,
+  "overall_recall": 0.0,
+  "kras_recall_by_vaf": {
+    "0.05": false,
+    "0.1": false,
+    "0.2": false,
+    "0.3": false,
+    "0.5": false
+  },
+  "egfr_recall_by_vaf": {
+    "0.05": false,
+    "0.1": false,
+    "0.2": false,
+    "0.3": false,
+    "0.5": false
+  },
+  "vaf_pearson_r": null,
+  "vaf_mae": null
+}

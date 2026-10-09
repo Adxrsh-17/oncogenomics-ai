@@ -1,0 +1,23 @@
+{
+  "project": "OncoSeq-AI \u2014 GPU-Accelerated Somatic Variant Analysis (TCGA-LUAD)",
+  "team": "Sai Nivedh V, Roshan T, Syed Anees Ashraf, Adarsh P",
+  "gpu_device": "Tesla T4",
+  "branch_a": {
+    "total_patients": 198,
+    "raw_mutations": 62146,
+    "after_qc": 62146,
+    "retention_pct": 100.0,
+    "kras_g12c_patients": 21,
+    "egfr_l858r_patients": 8,
+    "target_cohort_union": 29,
+    "median_mut_burden": 212
+  },
+  "branch_b": {
+    "cpu_wgs_hours": 36.0,
+    "parabricks_wgs_hours": 0.63,
+    "speedup_literature": "56.8x",
+    "speedup_local_observed": 14.1,
+    "literature_source": "O'Connell et al. BMC Bioinformatics 24:221, 2023"
+  },
+  "output_figures": 6
+}

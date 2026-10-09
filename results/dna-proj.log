@@ -1,0 +1,392 @@
+[{"stream_name":"stderr","time":8.426307884,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.42635036,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.42635428,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.426356834,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":9.088994422,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":9.089022015,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":9.089027247,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":9.089031769,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":10.479112036,"data":"=== GPU Status ===\n"}
+,{"stream_name":"stdout","time":13.205660841,"data":"Fri Oct  9 10:36:24 2026       \n"}
+,{"stream_name":"stdout","time":13.205691886,"data":"+-----------------------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":13.205696406,"data":"| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n"}
+,{"stream_name":"stdout","time":13.205700232,"data":"+-----------------------------------------+------------------------+----------------------+\n"}
+,{"stream_name":"stdout","time":13.205703994,"data":"| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n"}
+,{"stream_name":"stdout","time":13.205707778,"data":"| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n"}
+,{"stream_name":"stdout","time":13.20571668,"data":"|                                         |                        |               MIG M. |\n"}
+,{"stream_name":"stdout","time":13.20571996,"data":"|=========================================+========================+======================|\n"}
+,{"stream_name":"stdout","time":13.20572243,"data":"|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |\n"}
+,{"stream_name":"stdout","time":13.205724822,"data":"| N/A   40C    P8             11W /   70W |       0MiB /  15360MiB |      0%      Default |\n"}
+,{"stream_name":"stdout","time":13.205727235,"data":"|                                         |                        |                  N/A |\n"}
+,{"stream_name":"stdout","time":13.205729782,"data":"+-----------------------------------------+------------------------+----------------------+\n"}
+,{"stream_name":"stdout","time":13.205732548,"data":"|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |\n"}
+,{"stream_name":"stdout","time":13.205735094,"data":"| N/A   40C    P8              9W /   70W |       0MiB /  15360MiB |      0%      Default |\n"}
+,{"stream_name":"stdout","time":13.205737642,"data":"|                                         |                        |                  N/A |\n"}
+,{"stream_name":"stdout","time":13.205740172,"data":"+-----------------------------------------+------------------------+----------------------+\n"}
+,{"stream_name":"stdout","time":13.205742731,"data":"\n"}
+,{"stream_name":"stdout","time":13.205745018,"data":"+-----------------------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":13.205747424,"data":"| Processes:                                                                              |\n"}
+,{"stream_name":"stdout","time":13.205759458,"data":"|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n"}
+,{"stream_name":"stdout","time":13.205762128,"data":"|        ID   ID                                                               Usage      |\n"}
+,{"stream_name":"stdout","time":13.205764733,"data":"|=========================================================================================|\n"}
+,{"stream_name":"stdout","time":13.205767236,"data":"|  No running processes found                                                             |\n"}
+,{"stream_name":"stdout","time":13.205770649,"data":"+-----------------------------------------------------------------------------------------+\n"}
+,{"stream_name":"stdout","time":13.205773126,"data":"\n"}
+,{"stream_name":"stdout","time":18.817691024,"data":"\n"}
+,{"stream_name":"stdout","time":18.817723354,"data":"CUDA available: True\n"}
+,{"stream_name":"stdout","time":18.817727782,"data":"GPU: Tesla T4\n"}
+,{"stream_name":"stdout","time":18.817731362,"data":"VRAM: 15.6 GB\n"}
+,{"stream_name":"stdout","time":23.350801144,"data":"\n"}
+,{"stream_name":"stdout","time":23.350837216,"data":"Dependencies ready\n"}
+,{"stream_name":"stdout","time":24.544192096,"data":"Fetching TCGA-LUAD MAF file list from GDC...\n"}
+,{"stream_name":"stdout","time":25.036298486,"data":"Found 200 MAF files (~19.6 MB total)\n"}
+,{"stream_name":"stdout","time":25.036331724,"data":"Bulk downloading MAF archive...\n"}
+,{"stream_name":"stdout","time":73.239023353,"data":"Downloaded 19.6 MB\n"}
+,{"stream_name":"stdout","time":73.239060528,"data":"Merging 200 MAF files...\n"}
+,{"stream_name":"stdout","time":81.615355874,"data":"Saved merged MAF: 62,146 rows\n"}
+,{"stream_name":"stdout","time":81.615404414,"data":"\n"}
+,{"stream_name":"stdout","time":81.615415025,"data":"MAF shape: (62146, 140)\n"}
+,{"stream_name":"stdout","time":81.615419276,"data":"Columns: ['Hugo_Symbol', 'Entrez_Gene_Id', 'Center', 'NCBI_Build', 'Chromosome', 'Start_Position', 'End_Position', 'Strand', 'Variant_Classification', 'Variant_Type', 'Reference_Allele', 'Tumor_Seq_Allele1', 'Tumor_Seq_Allele2', 'dbSNP_RS', 'dbSNP_Val_Status']\n"}
+,{"stream_name":"stdout","time":81.615423692,"data":"Unique samples: 198\n"}
+,{"stream_name":"stdout","time":81.84574636400001,"data":"=== Stage 1: MAF Preprocessing ===\n"}
+,{"stream_name":"stdout","time":81.84578554,"data":"Raw mutation records: 62,146\n"}
+,{"stream_name":"stdout","time":82.047612101,"data":"Dropped 25 all-null columns\n"}
+,{"stream_name":"stdout","time":82.345726412,"data":"Removed 0 duplicates\n"}
+,{"stream_name":"stdout","time":82.34578095,"data":"\n"}
+,{"stream_name":"stdout","time":82.345789334,"data":"Retained: 62,146 / 62,146 (100.0%)\n"}
+,{"stream_name":"stdout","time":82.345795264,"data":"Unique patients: 198\n"}
+,{"stream_name":"stdout","time":82.34580075,"data":"Median mutations/patient: 212\n"}
+,{"stream_name":"stdout","time":82.34580547,"data":"Mean mutations/patient:   314\n"}
+,{"stream_name":"stdout","time":82.473039274,"data":"=== Target Variant Extraction ===\n"}
+,{"stream_name":"stdout","time":82.473071944,"data":"Gene column: Hugo_Symbol | Protein column: HGVSp_Short\n"}
+,{"stream_name":"stdout","time":82.473079092,"data":"Total patients:          198\n"}
+,{"stream_name":"stdout","time":82.473084378,"data":"KRAS p.G12C patients:    21\n"}
+,{"stream_name":"stdout","time":82.473097443,"data":"EGFR p.L858R patients:   8\n"}
+,{"stream_name":"stdout","time":82.47310241,"data":"Both:                    0\n"}
+,{"stream_name":"stdout","time":82.473120823,"data":"Target patients (union): 29\n"}
+,{"stream_name":"stdout","time":85.190681862,"data":"Fig 1 saved\n"}
+,{"stream_name":"stdout","time":85.827996763,"data":"Fig 2 saved\n"}
+,{"stream_name":"stdout","time":86.028864609,"data":"=== Branch B: GPU Benchmarking (Parabricks Mutect2 Surrogate) ===\n"}
+,{"stream_name":"stdout","time":86.028907011,"data":"Device: cuda\n"}
+,{"stream_name":"stdout","time":86.028912198,"data":"GPU: Tesla T4\n"}
+,{"stream_name":"stdout","time":86.028916335,"data":"VRAM: 15.64 GB\n"}
+,{"stream_name":"stdout","time":86.028920189,"data":"\n"}
+,{"stream_name":"stdout","time":86.028923855,"data":"Running GPU benchmark (4096×4096 matmul, 20 reps)...\n"}
+,{"stream_name":"stdout","time":87.254352437,"data":"  GPU: 44.45 ± 40.06 ms\n"}
+,{"stream_name":"stdout","time":87.254431627,"data":"Running CPU benchmark (2048×2048 matmul, 5 reps)...\n"}
+,{"stream_name":"stdout","time":87.726317821,"data":"  CPU (scaled to 4096): 625.34 ms\n"}
+,{"stream_name":"stdout","time":87.726353939,"data":"\n"}
+,{"stream_name":"stdout","time":87.726358514,"data":"Observed local speedup: 14.1x\n"}
+,{"stream_name":"stdout","time":87.726378732,"data":"\n"}
+,{"stream_name":"stdout","time":87.726385419,"data":"--- WGS Pipeline Timing (literature calibration) ---\n"}
+,{"stream_name":"stdout","time":87.726389586,"data":"CPU GATK baseline:          36 h\n"}
+,{"stream_name":"stdout","time":87.726392974,"data":"Parabricks T4 (56.8x):      0.63 h = 38 min\n"}
+,{"stream_name":"stdout","time":87.726396671,"data":"Literature source:          O'Connell et al. BMC Bioinformatics 24:221, 2023\n"}
+,{"stream_name":"stdout","time":91.712421319,"data":"Fig 3 saved\n"}
+,{"stream_name":"stdout","time":91.912986065,"data":"Pathway Analysis:\n"}
+,{"stream_name":"stdout","time":91.913019186,"data":"   Pathway  Patients  Pct Top_Gene  Top_Gene_N\n"}
+,{"stream_name":"stdout","time":91.91302514,"data":"Cell Cycle       116 58.6     TP53         100\n"}
+,{"stream_name":"stdout","time":91.913029628,"data":"  RAS/MAPK        95 48.0     KRAS          58\n"}
+,{"stream_name":"stdout","time":91.913033928,"data":"RTK/Growth        70 35.4     EGFR          31\n"}
+,{"stream_name":"stdout","time":91.913038165,"data":" Chromatin        66 33.3  SMARCA4          21\n"}
+,{"stream_name":"stdout","time":91.913042444,"data":"  PI3K/AKT        41 20.7   PIK3CA          15\n"}
+,{"stream_name":"stdout","time":91.913046907,"data":"DNA Repair        39 19.7    BRCA2          13\n"}
+,{"stream_name":"stdout","time":91.913051154,"data":"       Wnt        25 12.6      APC          13\n"}
+,{"stream_name":"stdout","time":92.038499883,"data":"Fig 4 saved\n"}
+,{"stream_name":"stdout","time":92.060920922,"data":"=== Clinical Interpretation Layer ===\n"}
+,{"stream_name":"stdout","time":92.060951914,"data":"\n"}
+,{"stream_name":"stdout","time":92.060957404,"data":"KRAS_G12C\n"}
+,{"stream_name":"stdout","time":92.060961912,"data":"  drug        : Sotorasib (AMG-510)\n"}
+,{"stream_name":"stdout","time":92.060966565,"data":"  approval    : FDA 2021 (CodeBreaK 100)\n"}
+,{"stream_name":"stdout","time":92.060970764,"data":"  tier        : Tier I\n"}
+,{"stream_name":"stdout","time":92.060975197,"data":"  rr          : 37.1%\n"}
+,{"stream_name":"stdout","time":92.060979495,"data":"  db          : OncoKB L1 / CIViC EID2997\n"}
+,{"stream_name":"stdout","time":92.060983896,"data":"\n"}
+,{"stream_name":"stdout","time":92.060987479,"data":"EGFR_L858R\n"}
+,{"stream_name":"stdout","time":92.060991225,"data":"  drug        : Osimertinib (AZD9291)\n"}
+,{"stream_name":"stdout","time":92.061004768,"data":"  approval    : FDA 1st-line (FLAURA)\n"}
+,{"stream_name":"stdout","time":92.061008619,"data":"  tier        : Tier I\n"}
+,{"stream_name":"stdout","time":92.06101228,"data":"  rr          : 80%\n"}
+,{"stream_name":"stdout","time":92.061015902,"data":"  db          : OncoKB L1 / ClinVar Pathogenic\n"}
+,{"stream_name":"stdout","time":92.061019623,"data":"\n"}
+,{"stream_name":"stdout","time":92.061023156,"data":"TP53\n"}
+,{"stream_name":"stdout","time":92.061026799,"data":"  drug        : No direct target (tumor suppressor)\n"}
+,{"stream_name":"stdout","time":92.061032404,"data":"  approval    : Prognostic — synth. lethal combos in trial\n"}
+,{"stream_name":"stdout","time":92.061040435,"data":"  tier        : Tier II\n"}
+,{"stream_name":"stdout","time":92.061043335,"data":"  rr          : N/A\n"}
+,{"stream_name":"stdout","time":92.061061924,"data":"  db          : COSMIC / ClinVar\n"}
+,{"stream_name":"stdout","time":92.061066224,"data":"\n"}
+,{"stream_name":"stdout","time":92.061076988,"data":"STK11\n"}
+,{"stream_name":"stdout","time":92.061081816,"data":"  drug        : PD-1/PD-L1 resistance marker\n"}
+,{"stream_name":"stdout","time":92.061085726,"data":"  approval    : Pembrolizumab resistance predictor\n"}
+,{"stream_name":"stdout","time":92.061089575,"data":"  tier        : Tier II\n"}
+,{"stream_name":"stdout","time":92.061093197,"data":"  rr          : Negative\n"}
+,{"stream_name":"stdout","time":92.061096895,"data":"  db          : OncoKB / COSMIC\n"}
+,{"stream_name":"stdout","time":92.061100575,"data":"\n"}
+,{"stream_name":"stdout","time":92.061104175,"data":"Patient report written: 29 target patients\n"}
+,{"stream_name":"stdout","time":92.061107921,"data":"     Patient KRAS_G12C EGFR_L858R  Mut_Burden     Actionable\n"}
+,{"stream_name":"stdout","time":92.06111184,"data":"TCGA-49-4505       YES         no         231      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061115562,"data":"TCGA-05-4418       YES         no         301      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061119375,"data":"TCGA-17-Z042       YES         no         511      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061123145,"data":"TCGA-78-7145       YES         no         202      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.0611269,"data":"TCGA-MP-A4T9        no        YES          36  / Osimertinib\n"}
+,{"stream_name":"stdout","time":92.06113065,"data":"TCGA-67-3774       YES         no         121      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061134449,"data":"TCGA-50-5051       YES         no         123      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061140158,"data":"TCGA-MP-A4SW        no        YES          69  / Osimertinib\n"}
+,{"stream_name":"stdout","time":92.061147439,"data":"TCGA-NJ-A4YI       YES         no         502      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061170676,"data":"TCGA-55-8207       YES         no         351      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061175387,"data":"TCGA-55-6983       YES         no         114      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061179514,"data":"TCGA-MP-A4TD       YES         no          88      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061184056,"data":"TCGA-05-4244       YES         no         230      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061188518,"data":"TCGA-J2-8194       YES         no         161      Sotorasib\n"}
+,{"stream_name":"stdout","time":92.061192393,"data":"TCGA-55-7914       YES         no         189      Sotorasib\n"}
+,{"stream_name":"stdout","time":93.738963485,"data":"Fig 5 saved\n"}
+,{"stream_name":"stdout","time":94.314886895,"data":"Fig 6 saved\n"}
+,{"stream_name":"stdout","time":94.3415518,"data":"=== OncoSeq-AI Final Summary ===\n"}
+,{"stream_name":"stdout","time":94.341594295,"data":"{\n"}
+,{"stream_name":"stdout","time":94.341600707,"data":"  \"project\": \"OncoSeq-AI \\u2014 GPU-Accelerated Somatic Variant Analysis (TCGA-LUAD)\",\n"}
+,{"stream_name":"stdout","time":94.341605322,"data":"  \"team\": \"Sai Nivedh V, Roshan T, Syed Anees Ashraf, Adarsh P\",\n"}
+,{"stream_name":"stdout","time":94.341609508,"data":"  \"gpu_device\": \"Tesla T4\",\n"}
+,{"stream_name":"stdout","time":94.341613428,"data":"  \"branch_a\": {\n"}
+,{"stream_name":"stdout","time":94.341617154,"data":"    \"total_patients\": 198,\n"}
+,{"stream_name":"stdout","time":94.341621331,"data":"    \"raw_mutations\": 62146,\n"}
+,{"stream_name":"stdout","time":94.341624924,"data":"    \"after_qc\": 62146,\n"}
+,{"stream_name":"stdout","time":94.341628501,"data":"    \"retention_pct\": 100.0,\n"}
+,{"stream_name":"stdout","time":94.341632689,"data":"    \"kras_g12c_patients\": 21,\n"}
+,{"stream_name":"stdout","time":94.341636668,"data":"    \"egfr_l858r_patients\": 8,\n"}
+,{"stream_name":"stdout","time":94.341640137,"data":"    \"target_cohort_union\": 29,\n"}
+,{"stream_name":"stdout","time":94.341643701,"data":"    \"median_mut_burden\": 212\n"}
+,{"stream_name":"stdout","time":94.341647078,"data":"  },\n"}
+,{"stream_name":"stdout","time":94.341650412,"data":"  \"branch_b\": {\n"}
+,{"stream_name":"stdout","time":94.341653735,"data":"    \"cpu_wgs_hours\": 36.0,\n"}
+,{"stream_name":"stdout","time":94.341657182,"data":"    \"parabricks_wgs_hours\": 0.63,\n"}
+,{"stream_name":"stdout","time":94.341660498,"data":"    \"speedup_literature\": \"56.8x\",\n"}
+,{"stream_name":"stdout","time":94.341663924,"data":"    \"speedup_local_observed\": 14.1,\n"}
+,{"stream_name":"stdout","time":94.34166745,"data":"    \"literature_source\": \"O'Connell et al. BMC Bioinformatics 24:221, 2023\"\n"}
+,{"stream_name":"stdout","time":94.341671173,"data":"  },\n"}
+,{"stream_name":"stdout","time":94.341674214,"data":"  \"output_figures\": 6\n"}
+,{"stream_name":"stdout","time":94.341678318,"data":"}\n"}
+,{"stream_name":"stdout","time":94.341682021,"data":"\n"}
+,{"stream_name":"stdout","time":94.341685745,"data":"=== Output Files ===\n"}
+,{"stream_name":"stdout","time":94.341689396,"data":"  /kaggle/working/__notebook__.ipynb  (48 KB)\n"}
+,{"stream_name":"stdout","time":94.341693542,"data":"  /kaggle/working/figures/fig1_cohort_overview.png  (148 KB)\n"}
+,{"stream_name":"stdout","time":94.341696794,"data":"  /kaggle/working/figures/fig2_target_variants.png  (117 KB)\n"}
+,{"stream_name":"stdout","time":94.34170074,"data":"  /kaggle/working/figures/fig3_gpu_benchmark.png  (152 KB)\n"}
+,{"stream_name":"stdout","time":94.341704635,"data":"  /kaggle/working/figures/fig4_pathway_analysis.png  (87 KB)\n"}
+,{"stream_name":"stdout","time":94.341709165,"data":"  /kaggle/working/figures/fig5_signature_clonality.png  (99 KB)\n"}
+,{"stream_name":"stdout","time":94.34171275,"data":"  /kaggle/working/figures/fig6_comutation.png  (77 KB)\n"}
+,{"stream_name":"stdout","time":94.34171626,"data":"  /kaggle/working/luad_maf.tar.gz  (19613 KB)\n"}
+,{"stream_name":"stdout","time":94.341719729,"data":"  /kaggle/working/maf_files/0121a6c3-c7ae-4619-b07a-27bb28541478/87c3bd07-208e-40e5-b427-f4f917260392.wxs.aliquot_ensemble_masked.maf.gz  (177 KB)\n"}
+,{"stream_name":"stdout","time":94.341723885,"data":"  /kaggle/working/maf_files/0182902d-bb3b-4b9d-bb2a-1b00c14e3b11/0196bd59-8bff-46da-a06a-4114fb1ffdb6.wxs.aliquot_ensemble_masked.maf.gz  (19 KB)\n"}
+,{"stream_name":"stdout","time":94.341736445,"data":"  /kaggle/working/maf_files/01e89769-e754-4eca-a5a3-b1b72ac4953f/751f6ac7-2f2a-4300-9ba4-87a92920d8bb.wxs.aliquot_ensemble_masked.maf.gz  (198 KB)\n"}
+,{"stream_name":"stdout","time":94.341751852,"data":"  /kaggle/working/maf_files/02c37aa1-ff1e-4548-ace1-0953351e6d01/418928d4-30ef-4e1c-ab3c-957ef4948ff8.wxs.aliquot_ensemble_masked.maf.gz  (349 KB)\n"}
+,{"stream_name":"stdout","time":94.341755501,"data":"  /kaggle/working/maf_files/02ddde9e-c1d4-443b-95fa-1cb9ebcf30b6/433f9e13-9954-4055-8d1a-e0353dc1e878.wxs.aliquot_ensemble_masked.maf.gz  (300 KB)\n"}
+,{"stream_name":"stdout","time":94.341761608,"data":"  /kaggle/working/maf_files/0344b01e-7430-4200-81cb-d48a3a8998ac/5387a7a6-6882-476e-a57c-fffca53b11e2.wxs.aliquot_ensemble_masked.maf.gz  (186 KB)\n"}
+,{"stream_name":"stdout","time":94.341765878,"data":"  /kaggle/working/maf_files/04cf76d7-4dc2-440d-a151-ce3a2d20fa5b/87fcadb6-f93b-4665-8737-99653ba137ec.wxs.aliquot_ensemble_masked.maf.gz  (30 KB)\n"}
+,{"stream_name":"stdout","time":94.341769822,"data":"  /kaggle/working/maf_files/060badaa-6432-4366-a372-f42985923d07/3addff79-e536-4bbc-8529-a30c0e8b5b83.wxs.aliquot_ensemble_masked.maf.gz  (185 KB)\n"}
+,{"stream_name":"stdout","time":94.341773935,"data":"  /kaggle/working/maf_files/06c8f74d-21ff-43ff-b921-a364f8010b42/5623afdf-6852-4592-9a22-a36ac4319bb9.wxs.aliquot_ensemble_masked.maf.gz  (48 KB)\n"}
+,{"stream_name":"stdout","time":94.341777788,"data":"  /kaggle/working/maf_files/06ce81ad-a9fd-4f9c-9c7e-1ddbd8ec9d29/c07a24a8-cdb2-4ae2-af2c-33848f15159f.wxs.aliquot_ensemble_masked.maf.gz  (159 KB)\n"}
+,{"stream_name":"stdout","time":94.341781394,"data":"  /kaggle/working/maf_files/082e03c5-f49f-455e-9e6d-b477b962deca/e1a5102c-e7b6-49fd-b4a2-32a10936ab55.wxs.aliquot_ensemble_masked.maf.gz  (109 KB)\n"}
+,{"stream_name":"stdout","time":94.341785352,"data":"  /kaggle/working/maf_files/08dc3e42-c96a-4550-9f7e-f3ae3b4f728b/717fc03c-19da-4112-8d65-1df5f9b01d6f.wxs.aliquot_ensemble_masked.maf.gz  (55 KB)\n"}
+,{"stream_name":"stdout","time":94.341789245,"data":"  /kaggle/working/maf_files/0a48e132-74fa-456d-a292-a958d9373e3d/5dfa07b9-3d69-4974-9a29-336b47b0cdab.wxs.aliquot_ensemble_masked.maf.gz  (105 KB)\n"}
+,{"stream_name":"stdout","time":94.341792945,"data":"  /kaggle/working/maf_files/0d7c5d18-2f64-4313-b8dc-e7a492269744/ca4e1463-5536-460f-9dfb-5cf07edf4e56.wxs.aliquot_ensemble_masked.maf.gz  (92 KB)\n"}
+,{"stream_name":"stdout","time":94.341797163,"data":"  /kaggle/working/maf_files/0d970f54-4b95-42c1-8349-2b48e74840df/8a271f82-7006-4b6e-bc5e-8eb8138d7cd3.wxs.aliquot_ensemble_masked.maf.gz  (18 KB)\n"}
+,{"stream_name":"stdout","time":94.341801228,"data":"  /kaggle/working/maf_files/0ecdd76a-4131-4abb-a91e-add0e37e7e1a/135d87f4-2943-4e79-aaac-0693b2eeeb8e.wxs.aliquot_ensemble_masked.maf.gz  (88 KB)\n"}
+,{"stream_name":"stdout","time":94.341805253,"data":"  /kaggle/working/maf_files/0fc27300-1278-4615-9e67-c569939f294e/9591b9ec-827d-4cba-8bca-fb464015977e.wxs.aliquot_ensemble_masked.maf.gz  (56 KB)\n"}
+,{"stream_name":"stdout","time":94.341809011,"data":"  /kaggle/working/maf_files/1005879f-0532-4dac-9b6c-7abeb335c778/32c34928-e19c-4f50-989b-ba32f2f946bd.wxs.aliquot_ensemble_masked.maf.gz  (46 KB)\n"}
+,{"stream_name":"stdout","time":94.341812939,"data":"  /kaggle/working/maf_files/101c7666-42ea-45d9-8288-16a3cbd47274/1a47b275-62bc-42a1-8543-65caaacf5ed3.wxs.aliquot_ensemble_masked.maf.gz  (76 KB)\n"}
+,{"stream_name":"stdout","time":94.34181725,"data":"  /kaggle/working/maf_files/1140a1ab-bec5-4884-bf42-ec7eb80756dd/6b7a0b2a-d183-4ea9-a938-3542e279457e.wxs.aliquot_ensemble_masked.maf.gz  (45 KB)\n"}
+,{"stream_name":"stdout","time":94.341821409,"data":"  /kaggle/working/maf_files/1309f4e1-0533-4d1c-aefb-1657da687007/e2b214ff-9f66-49c3-b4e6-540c7c4d9b89.wxs.aliquot_ensemble_masked.maf.gz  (55 KB)\n"}
+,{"stream_name":"stdout","time":94.34182919,"data":"  /kaggle/working/maf_files/15a1e41c-d1b4-435d-816e-930c8731998e/5e374a19-87e1-41ed-9dd7-9fd2e653c13a.wxs.aliquot_ensemble_masked.maf.gz  (96 KB)\n"}
+,{"stream_name":"stdout","time":94.341833089,"data":"  /kaggle/working/maf_files/17a121d0-95bb-4caa-9472-436d9ea89f11/73691763-129a-4710-ae38-c26ce0eaa55c.wxs.aliquot_ensemble_masked.maf.gz  (275 KB)\n"}
+,{"stream_name":"stdout","time":94.341836909,"data":"  /kaggle/working/maf_files/182b62f5-d632-41ed-ac95-e35492481e0f/a4afb459-8fc1-4b3e-95fe-5dbf41009fff.wxs.aliquot_ensemble_masked.maf.gz  (68 KB)\n"}
+,{"stream_name":"stdout","time":94.341840706,"data":"  /kaggle/working/maf_files/1c932ec8-5d1f-4a48-9dbe-cc61c6dd93bb/9088478f-0a26-44e3-af3c-ec2c80bbae26.wxs.aliquot_ensemble_masked.maf.gz  (352 KB)\n"}
+,{"stream_name":"stdout","time":94.341844629,"data":"  /kaggle/working/maf_files/22bafb55-4327-4fbc-8443-0587fb49d8fd/c534284e-9bde-42ff-87c3-effe204a4030.wxs.aliquot_ensemble_masked.maf.gz  (12 KB)\n"}
+,{"stream_name":"stdout","time":94.341848532,"data":"  /kaggle/working/maf_files/259a728a-4631-4fb7-8476-0e26bb956954/e8c0f5da-a42f-4276-8ee7-55b5b071f099.wxs.aliquot_ensemble_masked.maf.gz  (155 KB)\n"}
+,{"stream_name":"stdout","time":94.34185184,"data":"  /kaggle/working/maf_files/25f0bd27-2eda-447f-bd38-3752780bbf06/96355b5c-9ac0-4b1e-ac66-41e145f4778e.wxs.aliquot_ensemble_masked.maf.gz  (58 KB)\n"}
+,{"stream_name":"stdout","time":94.341855679,"data":"  /kaggle/working/maf_files/267967f3-55ab-4d6c-8fc0-967caeb246ff/be74c31e-7e92-4d6e-b51f-147c08571e3c.wxs.aliquot_ensemble_masked.maf.gz  (140 KB)\n"}
+,{"stream_name":"stdout","time":94.341859588,"data":"  /kaggle/working/maf_files/26d7b691-e994-4667-a0d9-38f1bb86e484/0c272376-5384-4ce1-877f-792d9732b04d.wxs.aliquot_ensemble_masked.maf.gz  (39 KB)\n"}
+,{"stream_name":"stdout","time":94.341863387,"data":"  /kaggle/working/maf_files/272f8df5-b85b-4fa9-b3ad-336c028d761a/b44c03fa-b8b0-40ad-9092-f3818640f4cf.wxs.aliquot_ensemble_masked.maf.gz  (47 KB)\n"}
+,{"stream_name":"stdout","time":94.34186721,"data":"  /kaggle/working/maf_files/2c2f463b-28fd-44e5-94e4-a3562fdb221e/7eee3182-a4c8-4ccb-9894-547dd9a7111a.wxs.aliquot_ensemble_masked.maf.gz  (41 KB)\n"}
+,{"stream_name":"stdout","time":94.341870971,"data":"  /kaggle/working/maf_files/2f7cbb23-a6af-4410-93fa-88900bfe8ea7/be27e5a0-7124-4c6d-a5e4-59331bdc1cb0.wxs.aliquot_ensemble_masked.maf.gz  (35 KB)\n"}
+,{"stream_name":"stdout","time":94.341875693,"data":"  /kaggle/working/maf_files/3015eea2-632f-4290-99eb-76e8d88a14f2/074862f2-acbf-4141-a72a-da28c9cb5f39.wxs.aliquot_ensemble_masked.maf.gz  (68 KB)\n"}
+,{"stream_name":"stdout","time":94.341879605,"data":"  /kaggle/working/maf_files/3050678f-ea4a-419a-9553-ade8d2411e88/1146eae8-cf57-410f-9637-7e404ebcc274.wxs.aliquot_ensemble_masked.maf.gz  (345 KB)\n"}
+,{"stream_name":"stdout","time":94.3418835,"data":"  /kaggle/working/maf_files/306d2308-a5f0-41a4-81b9-48e037117f23/3a03f1cb-556e-4051-bfe8-7c2bb4fc2c30.wxs.aliquot_ensemble_masked.maf.gz  (118 KB)\n"}
+,{"stream_name":"stdout","time":94.341887447,"data":"  /kaggle/working/maf_files/308349b2-11c8-4cf8-bd42-c7f7ec2667a3/1af3a5e1-1558-49b0-b946-2ed353f93fa2.wxs.aliquot_ensemble_masked.maf.gz  (111 KB)\n"}
+,{"stream_name":"stdout","time":94.341891147,"data":"  /kaggle/working/maf_files/323ca078-aeb1-42c1-9499-233b303a31d6/a889c655-2d38-42ad-b7db-7cd66043fe43.wxs.aliquot_ensemble_masked.maf.gz  (8 KB)\n"}
+,{"stream_name":"stdout","time":94.341895237,"data":"  /kaggle/working/maf_files/327fe3d9-a1ba-413e-b37c-b07fc3ca2382/baa26760-7f80-4254-bb9d-ce5b8a3e320f.wxs.aliquot_ensemble_masked.maf.gz  (268 KB)\n"}
+,{"stream_name":"stdout","time":94.34189913,"data":"  /kaggle/working/maf_files/32b00d18-e064-44d7-ada0-78ff1a8160b7/80e03a98-f4e8-42a8-9b6e-5b502222690b.wxs.aliquot_ensemble_masked.maf.gz  (68 KB)\n"}
+,{"stream_name":"stdout","time":94.341905543,"data":"  /kaggle/working/maf_files/32b9c4d4-be15-4693-9881-fcb35c781264/70f02542-6746-493c-bc6f-12aae8b6ea62.wxs.aliquot_ensemble_masked.maf.gz  (97 KB)\n"}
+,{"stream_name":"stdout","time":94.341909439,"data":"  /kaggle/working/maf_files/33517eb8-ce28-410f-85b3-e4e14a75e4ad/2d20c120-22b3-4c99-b5de-5cec0a7dd839.wxs.aliquot_ensemble_masked.maf.gz  (47 KB)\n"}
+,{"stream_name":"stdout","time":94.341913291,"data":"  /kaggle/working/maf_files/358c3717-fbaf-4d29-abe1-3a64e3f95880/f5f0de46-8e12-4e9d-a9d4-509db39369da.wxs.aliquot_ensemble_masked.maf.gz  (29 KB)\n"}
+,{"stream_name":"stdout","time":94.341917132,"data":"  /kaggle/working/maf_files/368ec743-957f-4599-8627-aa1a8e871056/83798b8a-d1bf-4e49-927c-b584f9dc576f.wxs.aliquot_ensemble_masked.maf.gz  (95 KB)\n"}
+,{"stream_name":"stdout","time":94.341920913,"data":"  /kaggle/working/maf_files/374e13e1-98a8-4b65-94da-0d78ae51df5a/14826ad4-fe64-4f31-bb3e-8e2d57ad7f5f.wxs.aliquot_ensemble_masked.maf.gz  (246 KB)\n"}
+,{"stream_name":"stdout","time":94.341924628,"data":"  /kaggle/working/maf_files/3a79de6c-d4e3-4ca5-b862-8800f01d9116/dc65e332-d7be-47f1-9fa0-b9933bc8873e.wxs.aliquot_ensemble_masked.maf.gz  (121 KB)\n"}
+,{"stream_name":"stdout","time":94.341928459,"data":"  /kaggle/working/maf_files/3c9219ac-cf5f-4ab9-9bf3-5ff16a4ab1ff/dec2238d-eb92-482c-8f72-ad4a9dfb2df1.wxs.aliquot_ensemble_masked.maf.gz  (23 KB)\n"}
+,{"stream_name":"stdout","time":94.341932629,"data":"  /kaggle/working/maf_files/3c95d846-6ef5-4810-a389-7444d4873fef/ddb4676c-ef89-4187-9aee-8960d4782bd0.wxs.aliquot_ensemble_masked.maf.gz  (242 KB)\n"}
+,{"stream_name":"stdout","time":94.341936852,"data":"  /kaggle/working/maf_files/3e44a213-5858-411a-80be-23104fb8066f/56b2a13b-1539-4ef2-ae60-e5a29c673f9a.wxs.aliquot_ensemble_masked.maf.gz  (21 KB)\n"}
+,{"stream_name":"stdout","time":94.341940754,"data":"  /kaggle/working/maf_files/3e4e26b2-ee75-4349-80c4-7ad68b2e4e8b/5f03ea6f-ff8f-401c-8585-4c6e7fd81f47.wxs.aliquot_ensemble_masked.maf.gz  (1 KB)\n"}
+,{"stream_name":"stdout","time":94.341944492,"data":"  /kaggle/working/maf_files/3e4ee4d8-83e1-4045-9e90-dc98ac3224b3/ecfd1158-6ba8-44a3-b0e1-a557190df23c.wxs.aliquot_ensemble_masked.maf.gz  (22 KB)\n"}
+,{"stream_name":"stdout","time":94.341947735,"data":"  /kaggle/working/maf_files/3f7e6a62-368b-4354-8a5c-6cf515aef2f0/8c3e48d3-618b-40d3-a9c7-bc98a3bd226f.wxs.aliquot_ensemble_masked.maf.gz  (54 KB)\n"}
+,{"stream_name":"stdout","time":94.341951546,"data":"  /kaggle/working/maf_files/3fce5f60-2af0-4b06-bc86-800f42d8e33e/b59f8f51-d09c-403b-8ad2-98c9bd65cfb5.wxs.aliquot_ensemble_masked.maf.gz  (85 KB)\n"}
+,{"stream_name":"stdout","time":94.341955407,"data":"  /kaggle/working/maf_files/4043db72-f008-44d3-b59d-660a2272e4b8/f4d7bedd-5236-4302-876e-485fc1e8b185.wxs.aliquot_ensemble_masked.maf.gz  (26 KB)\n"}
+,{"stream_name":"stdout","time":94.341959221,"data":"  /kaggle/working/maf_files/40d5190b-b6ed-4616-9981-a3b7eb2d7c2b/6313be87-755f-4626-9b99-6e72d1866693.wxs.aliquot_ensemble_masked.maf.gz  (107 KB)\n"}
+,{"stream_name":"stdout","time":94.341963062,"data":"  /kaggle/working/maf_files/4152e8ad-21fa-4d37-9ddf-1e7dc7cd0745/bc54cdb9-e105-4688-af63-1cb5cf9b3661.wxs.aliquot_ensemble_masked.maf.gz  (161 KB)\n"}
+,{"stream_name":"stdout","time":94.34196688,"data":"  /kaggle/working/maf_files/4236883f-0c7e-442e-822e-86fc41b8dbe3/33467953-393f-4b0b-82f0-6714ce0b75f4.wxs.aliquot_ensemble_masked.maf.gz  (291 KB)\n"}
+,{"stream_name":"stdout","time":94.341970674,"data":"  /kaggle/working/maf_files/42a46e5a-09e0-48ae-85e4-8dcc09785753/d0d1e5e7-26c5-4b5b-b4c5-7e47b41d4c42.wxs.aliquot_ensemble_masked.maf.gz  (16 KB)\n"}
+,{"stream_name":"stdout","time":94.341974714,"data":"  /kaggle/working/maf_files/45731335-5a61-4e1c-9d19-673daa536742/0ff570c3-f2f3-46fc-bd84-5054a3b87975.wxs.aliquot_ensemble_masked.maf.gz  (15 KB)\n"}
+,{"stream_name":"stdout","time":94.341981375,"data":"  /kaggle/working/maf_files/46b86010-698f-4bdf-ad39-94668dadfffd/d74b882c-ee9e-4f4d-bbcb-a1cd3e92c63b.wxs.aliquot_ensemble_masked.maf.gz  (44 KB)\n"}
+,{"stream_name":"stdout","time":94.34198528,"data":"  /kaggle/working/maf_files/470b8e24-fe52-48ef-a2ff-dccc721d7a8b/17aa2bf6-e83b-4a21-895b-af624c4da749.wxs.aliquot_ensemble_masked.maf.gz  (99 KB)\n"}
+,{"stream_name":"stdout","time":94.341990288,"data":"  /kaggle/working/maf_files/48083399-d37d-4d57-9036-6fb1f7741f15/ad634b03-eab5-48ba-ada3-b984f8a1d187.wxs.aliquot_ensemble_masked.maf.gz  (190 KB)\n"}
+,{"stream_name":"stdout","time":94.341994668,"data":"  /kaggle/working/maf_files/4b20d50c-f569-4703-93ec-584c267e3fdf/0ef89e1c-653a-4be0-a6a3-b427f2dd2d00.wxs.aliquot_ensemble_masked.maf.gz  (41 KB)\n"}
+,{"stream_name":"stdout","time":94.34199848,"data":"  /kaggle/working/maf_files/4dad599e-bbfb-42a5-b23f-13511e29cf1e/e37f949e-f31e-4c48-abaa-27231b24694b.wxs.aliquot_ensemble_masked.maf.gz  (43 KB)\n"}
+,{"stream_name":"stdout","time":94.342002629,"data":"  /kaggle/working/maf_files/51371120-76d8-4bd2-857d-2bc06c574ad6/acda5160-7899-4a50-88ed-418d55adaea7.wxs.aliquot_ensemble_masked.maf.gz  (50 KB)\n"}
+,{"stream_name":"stdout","time":94.342006509,"data":"  /kaggle/working/maf_files/546e44ff-279b-4e74-bb3e-071d408856c9/4afba480-8150-42e7-a03b-8fa54760c1e1.wxs.aliquot_ensemble_masked.maf.gz  (173 KB)\n"}
+,{"stream_name":"stdout","time":94.342010474,"data":"  /kaggle/working/maf_files/590f514e-a6a5-4a9c-a653-5709525281ea/413940e1-c35b-41ca-a381-381deff762f9.wxs.aliquot_ensemble_masked.maf.gz  (27 KB)\n"}
+,{"stream_name":"stdout","time":94.342014376,"data":"  /kaggle/working/maf_files/597cdc66-17b0-496a-b51d-778df192aca7/3e9c84da-741e-4647-bc34-a17b4e637f0e.wxs.aliquot_ensemble_masked.maf.gz  (42 KB)\n"}
+,{"stream_name":"stdout","time":94.342018234,"data":"  /kaggle/working/maf_files/5ae532c3-6923-4272-8286-97ace9db9437/7f880828-1f81-4973-8efa-a052497c2b0f.wxs.aliquot_ensemble_masked.maf.gz  (291 KB)\n"}
+,{"stream_name":"stdout","time":94.342022034,"data":"  /kaggle/working/maf_files/5ebaff32-1172-4b1b-bb0d-bf0b71b8c5fd/b1b055bf-b91a-4aeb-88a8-ef30662b2c22.wxs.aliquot_ensemble_masked.maf.gz  (19 KB)\n"}
+,{"stream_name":"stdout","time":94.34202588,"data":"  /kaggle/working/maf_files/61300c06-3272-45e4-b19f-94dfd276debd/f3934f06-2c19-40b7-88dc-b46d1a573bdc.wxs.aliquot_ensemble_masked.maf.gz  (29 KB)\n"}
+,{"stream_name":"stdout","time":94.342029721,"data":"  /kaggle/working/maf_files/652f3ee5-c653-4596-aeee-28984b11c5ae/c37fc808-f63e-40a5-9892-40a3d2d68c2f.wxs.aliquot_ensemble_masked.maf.gz  (65 KB)\n"}
+,{"stream_name":"stdout","time":94.342033575,"data":"  /kaggle/working/maf_files/6621a8f6-e61c-4c68-b042-eac761721381/98fb39e9-baa9-45eb-9024-8066f648fa65.wxs.aliquot_ensemble_masked.maf.gz  (53 KB)\n"}
+,{"stream_name":"stdout","time":94.342037519,"data":"  /kaggle/working/maf_files/663280fe-02ec-4470-b033-3f45b7364c6a/67691429-74f6-40fb-9c68-f408138b1dad.wxs.aliquot_ensemble_masked.maf.gz  (67 KB)\n"}
+,{"stream_name":"stdout","time":94.342041312,"data":"  /kaggle/working/maf_files/67929cd7-8ce6-4fae-b44e-9c123366666e/0f9f350b-96b1-4e90-a103-624ab3289891.wxs.aliquot_ensemble_masked.maf.gz  (14 KB)\n"}
+,{"stream_name":"stdout","time":94.342045701,"data":"  /kaggle/working/maf_files/68212b71-6b6f-4825-91f5-80ee54a7f679/674ea8d3-9ab3-4f82-99e3-3fe2481e756c.wxs.aliquot_ensemble_masked.maf.gz  (232 KB)\n"}
+,{"stream_name":"stdout","time":94.342049554,"data":"  /kaggle/working/maf_files/683b789b-dd99-4358-abb1-d345ddaf7cbb/1ca71ae5-bad9-4142-b00e-d9f74250bb62.wxs.aliquot_ensemble_masked.maf.gz  (12 KB)\n"}
+,{"stream_name":"stdout","time":94.342053381,"data":"  /kaggle/working/maf_files/683d979f-0ced-4839-b61b-c26f065c1da6/f099efdd-6021-4afd-9748-733e5056c0a4.wxs.aliquot_ensemble_masked.maf.gz  (51 KB)\n"}
+,{"stream_name":"stdout","time":94.342059644,"data":"  /kaggle/working/maf_files/6867f860-8669-4788-a3e3-f4e22380986f/fe36c53b-029a-473c-9277-aa9663cb020e.wxs.aliquot_ensemble_masked.maf.gz  (157 KB)\n"}
+,{"stream_name":"stdout","time":94.342063561,"data":"  /kaggle/working/maf_files/6a1c704a-961a-4fe9-842c-620227b5c785/70b66624-d30b-4fed-b7aa-248efd0ac7c3.wxs.aliquot_ensemble_masked.maf.gz  (10 KB)\n"}
+,{"stream_name":"stdout","time":94.342067377,"data":"  /kaggle/working/maf_files/6a20cd8d-24b7-43cc-930e-06c6c7c7fb59/77c1ae1d-5940-46c6-b186-9b09b5a30058.wxs.aliquot_ensemble_masked.maf.gz  (77 KB)\n"}
+,{"stream_name":"stdout","time":94.342071202,"data":"  /kaggle/working/maf_files/6b197f17-cb41-47b5-a743-336d6143cf1b/684304b9-825b-4504-99ae-6a6aca122929.wxs.aliquot_ensemble_masked.maf.gz  (87 KB)\n"}
+,{"stream_name":"stdout","time":94.34207472,"data":"  /kaggle/working/maf_files/6bd62e34-5534-4ee0-b69b-c40ab757489d/c7ee3e85-75fb-4fe9-ae51-97d149781b26.wxs.aliquot_ensemble_masked.maf.gz  (270 KB)\n"}
+,{"stream_name":"stdout","time":94.342078589,"data":"  /kaggle/working/maf_files/6be43ec2-ea47-4fc8-a212-d87eec7bc88c/db9f2f65-f468-4bad-bbc8-a4c7ff6b0ea8.wxs.aliquot_ensemble_masked.maf.gz  (23 KB)\n"}
+,{"stream_name":"stdout","time":94.342082354,"data":"  /kaggle/working/maf_files/6bfa1e21-392f-4400-be5e-74deba5cb673/b044473a-8ac7-4fca-928e-274b08fa8e06.wxs.aliquot_ensemble_masked.maf.gz  (74 KB)\n"}
+,{"stream_name":"stdout","time":94.342086177,"data":"  /kaggle/working/maf_files/6d565875-6f49-4f18-9f4b-eb35996e0478/373968cd-7c79-4afb-90ab-454820370a50.wxs.aliquot_ensemble_masked.maf.gz  (20 KB)\n"}
+,{"stream_name":"stdout","time":94.342090127,"data":"  /kaggle/working/maf_files/6f448407-401e-48d2-b31e-60e70e7c0889/52aa22b0-0b50-4fd8-8723-2bfcf445fed9.wxs.aliquot_ensemble_masked.maf.gz  (16 KB)\n"}
+,{"stream_name":"stdout","time":94.34209393,"data":"  /kaggle/working/maf_files/6f90c03c-96f5-47dc-85fa-279c634b257e/d866327c-a734-4386-b4ca-7a30353baaa8.wxs.aliquot_ensemble_masked.maf.gz  (16 KB)\n"}
+,{"stream_name":"stdout","time":94.342098022,"data":"  /kaggle/working/maf_files/71379a24-2b0a-4898-8f23-a773d1809cfc/6ccf6b28-a355-4fe5-b8f6-8f510381a6f4.wxs.aliquot_ensemble_masked.maf.gz  (310 KB)\n"}
+,{"stream_name":"stdout","time":94.342102347,"data":"  /kaggle/working/maf_files/74d1cc4f-9efa-4e3c-b6f4-8ba5808dc022/49a8516e-b2a5-4ed9-8994-95f72b1263e4.wxs.aliquot_ensemble_masked.maf.gz  (147 KB)\n"}
+,{"stream_name":"stdout","time":94.342106173,"data":"  /kaggle/working/maf_files/74d9e845-4334-4178-9da3-11b3c07a225d/df35c635-dd73-4f6f-b141-6000ce81cb49.wxs.aliquot_ensemble_masked.maf.gz  (68 KB)\n"}
+,{"stream_name":"stdout","time":94.34211033,"data":"  /kaggle/working/maf_files/754193ef-252a-4e6e-a409-fd18e5c204f8/1e1db7e6-ca67-4c95-b9ca-824ecb607bd9.wxs.aliquot_ensemble_masked.maf.gz  (25 KB)\n"}
+,{"stream_name":"stdout","time":94.342115,"data":"  /kaggle/working/maf_files/76fb3ed7-96c6-497f-8a8b-3253c0d2f3da/48330638-0c8a-4ddd-81fc-7ed215d1869b.wxs.aliquot_ensemble_masked.maf.gz  (125 KB)\n"}
+,{"stream_name":"stdout","time":94.342119006,"data":"  /kaggle/working/maf_files/7ab6e0cc-73f2-481f-8c74-e89161f6c6ed/e8fd4269-c9e6-4f1d-be5f-eee80fc4b9fe.wxs.aliquot_ensemble_masked.maf.gz  (82 KB)\n"}
+,{"stream_name":"stdout","time":94.342122829,"data":"  /kaggle/working/maf_files/7c4c42d3-93a5-4222-9d7f-baee2ccb9694/6eb5d46b-ab8b-47f0-a36e-e73f9e05542e.wxs.aliquot_ensemble_masked.maf.gz  (166 KB)\n"}
+,{"stream_name":"stdout","time":94.342126696,"data":"  /kaggle/working/maf_files/7c66bb58-dc9f-4682-815d-d253f23a0283/6afd19e1-f1cd-436a-ab7d-2b622d3d0e25.wxs.aliquot_ensemble_masked.maf.gz  (224 KB)\n"}
+,{"stream_name":"stdout","time":94.34213057,"data":"  /kaggle/working/maf_files/7cc6c97b-1e0d-497e-9d18-fce6c24fb7dd/5c5b5776-e87b-4a6d-881b-e0c4ecd38af6.wxs.aliquot_ensemble_masked.maf.gz  (65 KB)\n"}
+,{"stream_name":"stdout","time":94.342142634,"data":"  /kaggle/working/maf_files/7d1d4767-656d-4a42-b402-e61f902de293/5b56ddb2-067c-4f81-8ca4-c423dc8b6738.wxs.aliquot_ensemble_masked.maf.gz  (41 KB)\n"}
+,{"stream_name":"stdout","time":94.342146557,"data":"  /kaggle/working/maf_files/7fa9482e-04e2-4a9d-b245-ed37eb5d0ba1/dfb7c0a5-0c5f-46e8-9f0c-f7c53330322b.wxs.aliquot_ensemble_masked.maf.gz  (93 KB)\n"}
+,{"stream_name":"stdout","time":94.342150439,"data":"  /kaggle/working/maf_files/802dd560-e426-4819-97be-2879ea30bf81/dc49004c-58d9-42ad-891c-805c6b43d947.wxs.aliquot_ensemble_masked.maf.gz  (128 KB)\n"}
+,{"stream_name":"stdout","time":94.342154503,"data":"  /kaggle/working/maf_files/81a8beea-4350-46e8-a4b6-335af0ba55c3/cd3ed839-5f10-4388-b488-3c45b6e12822.wxs.aliquot_ensemble_masked.maf.gz  (141 KB)\n"}
+,{"stream_name":"stdout","time":94.342158363,"data":"  /kaggle/working/maf_files/8412af57-4d6f-44eb-be68-7c175c6b4be7/08b3fa43-ccda-4429-86aa-c61fe590c20b.wxs.aliquot_ensemble_masked.maf.gz  (198 KB)\n"}
+,{"stream_name":"stdout","time":94.342162228,"data":"  /kaggle/working/maf_files/8416388e-8a30-441d-b14b-bfcec4daf78a/455d27a7-9bca-4f47-86ce-38afccfe9ab5.wxs.aliquot_ensemble_masked.maf.gz  (43 KB)\n"}
+,{"stream_name":"stdout","time":94.342166387,"data":"  /kaggle/working/maf_files/84a48edd-9391-4b35-b78c-506fd1191abc/65b73b0e-67a7-43b6-8719-8935176d13f0.wxs.aliquot_ensemble_masked.maf.gz  (59 KB)\n"}
+,{"stream_name":"stdout","time":94.342170189,"data":"  /kaggle/working/maf_files/84c239c8-71c5-4b89-8522-c9368950e2b1/1e496d8c-0ab1-4462-b2e2-a48136ab138e.wxs.aliquot_ensemble_masked.maf.gz  (112 KB)\n"}
+,{"stream_name":"stdout","time":94.342173998,"data":"  /kaggle/working/maf_files/873e2d89-7b01-4e6a-8221-5440fdd0a295/76e4d4b5-4964-43b7-8008-d160245f5c5d.wxs.aliquot_ensemble_masked.maf.gz  (10 KB)\n"}
+,{"stream_name":"stdout","time":94.342177911,"data":"  /kaggle/working/maf_files/8c1e1479-7719-4391-b758-89526fe6bb26/4f32b0dd-1d38-4f67-9ea1-cd5a6fff7895.wxs.aliquot_ensemble_masked.maf.gz  (154 KB)\n"}
+,{"stream_name":"stdout","time":94.342181692,"data":"  /kaggle/working/maf_files/8ebd754b-e02d-4b3e-b5bf-adb55191ccfc/80a79cd5-e342-434d-b996-464c32f6efac.wxs.aliquot_ensemble_masked.maf.gz  (105 KB)\n"}
+,{"stream_name":"stdout","time":94.342185379,"data":"  /kaggle/working/maf_files/8f1edc95-995a-49aa-88b4-23669a44cf55/47068684-1d50-4040-98ac-37e1fc63ca93.wxs.aliquot_ensemble_masked.maf.gz  (85 KB)\n"}
+,{"stream_name":"stdout","time":94.342189166,"data":"  /kaggle/working/maf_files/902cb049-bebf-4684-8002-eaf909b26323/3c2fc414-420c-4190-941e-26a14a62cfc2.wxs.aliquot_ensemble_masked.maf.gz  (31 KB)\n"}
+,{"stream_name":"stdout","time":94.342193015,"data":"  /kaggle/working/maf_files/95db3ed6-4817-46bf-bad4-5f7ae09c5374/62a24d2d-9e15-4884-b569-76bbbe81439c.wxs.aliquot_ensemble_masked.maf.gz  (63 KB)\n"}
+,{"stream_name":"stdout","time":94.34219683,"data":"  /kaggle/working/maf_files/972f35c2-a12e-4f0f-8603-d62c736d76b5/68e4c04d-ce04-4ca0-81d6-78e684174317.wxs.aliquot_ensemble_masked.maf.gz  (194 KB)\n"}
+,{"stream_name":"stdout","time":94.342200923,"data":"  /kaggle/working/maf_files/9771081f-8e15-4df0-b25c-1c03c4a89ba6/9d21dcbc-0fcc-4694-aa8a-52f3a51a2ccb.wxs.aliquot_ensemble_masked.maf.gz  (41 KB)\n"}
+,{"stream_name":"stdout","time":94.342204734,"data":"  /kaggle/working/maf_files/99f5aa40-a043-420d-9ec8-9f7f1a420376/6c61a0df-1228-4052-b28c-38c44e3d4e60.wxs.aliquot_ensemble_masked.maf.gz  (42 KB)\n"}
+,{"stream_name":"stdout","time":94.34220856,"data":"  /kaggle/working/maf_files/9a09f5eb-719e-4b40-a83f-cc609c5252c6/64a87a6e-49fe-4416-8272-38833006c015.wxs.aliquot_ensemble_masked.maf.gz  (155 KB)\n"}
+,{"stream_name":"stdout","time":94.34221242,"data":"  /kaggle/working/maf_files/9aed36b2-ad1b-489d-b953-f1788c85d637/97151b4e-51dc-4d9b-a158-47eae00b84b9.wxs.aliquot_ensemble_masked.maf.gz  (19 KB)\n"}
+,{"stream_name":"stdout","time":94.342218578,"data":"  /kaggle/working/maf_files/9f0da6b3-341b-43d6-8220-c328eccb99ee/b755717a-4def-4ca8-8371-936741696bc7.wxs.aliquot_ensemble_masked.maf.gz  (144 KB)\n"}
+,{"stream_name":"stdout","time":94.342222827,"data":"  /kaggle/working/maf_files/9f4fa07e-188c-40a4-9c26-a5cca27767b4/73fcb0f6-6a7b-408c-8690-acaac02e872e.wxs.aliquot_ensemble_masked.maf.gz  (79 KB)\n"}
+,{"stream_name":"stdout","time":94.342226679,"data":"  /kaggle/working/maf_files/9f710d18-73e3-4576-8397-345d60eaa9e5/ae3ab4b5-d0a4-473d-8e34-d4ca663cd27a.wxs.aliquot_ensemble_masked.maf.gz  (85 KB)\n"}
+,{"stream_name":"stdout","time":94.342231,"data":"  /kaggle/working/maf_files/MANIFEST.txt  (39 KB)\n"}
+,{"stream_name":"stdout","time":94.342235058,"data":"  /kaggle/working/maf_files/a066b306-49fe-47c4-a19f-f86f40ada4d5/efd20b42-06c3-4d61-96f2-430d60ac65f2.wxs.aliquot_ensemble_masked.maf.gz  (253 KB)\n"}
+,{"stream_name":"stdout","time":94.342238924,"data":"  /kaggle/working/maf_files/a0da73e8-15b2-4fa5-b3b5-6e875f2aa960/478eb139-b068-4828-83da-baf2286cd424.wxs.aliquot_ensemble_masked.maf.gz  (13 KB)\n"}
+,{"stream_name":"stdout","time":94.342242716,"data":"  /kaggle/working/maf_files/a0f11989-c592-4d6b-a1ce-58f2a93cd7f0/d5ce47ea-a60d-4981-8cd7-6d6e13b08033.wxs.aliquot_ensemble_masked.maf.gz  (68 KB)\n"}
+,{"stream_name":"stdout","time":94.342246529,"data":"  /kaggle/working/maf_files/a13ce267-8b9f-419d-92d1-4e38dfc006b2/571ab7df-ee67-4c91-b06d-935a14b5baab.wxs.aliquot_ensemble_masked.maf.gz  (328 KB)\n"}
+,{"stream_name":"stdout","time":94.342250674,"data":"  /kaggle/working/maf_files/a2e630bf-b7a4-4f1c-af45-21183089137f/ef0a4a4f-60a3-4ea4-b836-0547026d32c7.wxs.aliquot_ensemble_masked.maf.gz  (45 KB)\n"}
+,{"stream_name":"stdout","time":94.342254684,"data":"  /kaggle/working/maf_files/a5705599-51bd-4f67-83ba-a1e1a1bdd62f/c8b0380b-818a-4689-a1dc-5bbecc611b7f.wxs.aliquot_ensemble_masked.maf.gz  (285 KB)\n"}
+,{"stream_name":"stdout","time":94.342258521,"data":"  /kaggle/working/maf_files/a75577ce-cb7c-4f0f-8244-42289449dcc9/1a8a2fa5-eff6-4e2d-8113-67b75e4d8134.wxs.aliquot_ensemble_masked.maf.gz  (82 KB)\n"}
+,{"stream_name":"stdout","time":94.342262305,"data":"  /kaggle/working/maf_files/a7f3e8f2-d3d9-4697-bb8a-de6b44132c01/fb688467-91aa-4321-95f0-a38444338584.wxs.aliquot_ensemble_masked.maf.gz  (19 KB)\n"}
+,{"stream_name":"stdout","time":94.342266149,"data":"  /kaggle/working/maf_files/a97a7f5f-1cfb-475e-93f3-aef0583da7ea/bc6315e3-b3cf-4474-8335-cb98e500833e.wxs.aliquot_ensemble_masked.maf.gz  (61 KB)\n"}
+,{"stream_name":"stdout","time":94.342270086,"data":"  /kaggle/working/maf_files/a97f8364-bf7a-4ba6-aae2-400a226c01b0/7fff37c4-934c-404b-b4a6-00045f08053b.wxs.aliquot_ensemble_masked.maf.gz  (120 KB)\n"}
+,{"stream_name":"stdout","time":94.34227398,"data":"  /kaggle/working/maf_files/aa1d3843-145a-4e36-9494-86eb54c0bcf8/a2eae656-2df6-40df-bc06-478163e5bdab.wxs.aliquot_ensemble_masked.maf.gz  (98 KB)\n"}
+,{"stream_name":"stdout","time":94.342277927,"data":"  /kaggle/working/maf_files/aa57de4e-7f8f-4c9c-a185-4ab87bb9e438/5eaa4117-0c17-40a6-94a9-ad229a8e5250.wxs.aliquot_ensemble_masked.maf.gz  (126 KB)\n"}
+,{"stream_name":"stdout","time":94.342282084,"data":"  /kaggle/working/maf_files/ab6c6851-eef1-409a-9de6-d566cbfd31a1/09a2b0ba-0978-48ff-aede-a989eafb7275.wxs.aliquot_ensemble_masked.maf.gz  (42 KB)\n"}
+,{"stream_name":"stdout","time":94.342285973,"data":"  /kaggle/working/maf_files/ac9fbafb-890f-455c-8178-6e089f108b81/ce82f575-1f44-4d65-9d54-a1844d282752.wxs.aliquot_ensemble_masked.maf.gz  (3 KB)\n"}
+,{"stream_name":"stdout","time":94.342289905,"data":"  /kaggle/working/maf_files/ad708c2d-e1b7-4e08-be32-b71c26310c41/3cfdf0dc-e83a-4001-87d6-89d570936fcc.wxs.aliquot_ensemble_masked.maf.gz  (581 KB)\n"}
+,{"stream_name":"stdout","time":94.342296724,"data":"  /kaggle/working/maf_files/ad79d2d6-8895-4d5a-9293-bd019d9ceed2/a97bc7f2-55c5-44b8-b615-796c5e35b2a6.wxs.aliquot_ensemble_masked.maf.gz  (127 KB)\n"}
+,{"stream_name":"stdout","time":94.3423006,"data":"  /kaggle/working/maf_files/b1211dbb-5d1a-48c2-8ff5-f92a0bbbd232/1e76b510-baea-41cf-b6be-365060c7a45d.wxs.aliquot_ensemble_masked.maf.gz  (39 KB)\n"}
+,{"stream_name":"stdout","time":94.342304506,"data":"  /kaggle/working/maf_files/b248ecb0-657d-4437-9b9e-0a9ce1c46990/cf821435-ea32-4fb4-b0c5-5c3207cb2763.wxs.aliquot_ensemble_masked.maf.gz  (19 KB)\n"}
+,{"stream_name":"stdout","time":94.342308391,"data":"  /kaggle/working/maf_files/b3e2dcfc-552c-41fc-855b-b7e7e1019df0/67b52888-d1ea-40f9-b4dd-38ccb8aa949f.wxs.aliquot_ensemble_masked.maf.gz  (408 KB)\n"}
+,{"stream_name":"stdout","time":94.342312208,"data":"  /kaggle/working/maf_files/b57794b8-77dd-42a3-931b-5ca6e6ca3030/a41c93c6-e79d-4852-953a-c0597f74d0c7.wxs.aliquot_ensemble_masked.maf.gz  (18 KB)\n"}
+,{"stream_name":"stdout","time":94.342316027,"data":"  /kaggle/working/maf_files/b6171ad0-d84d-46c2-adaa-500b7b45bbbb/1e6b8d4b-6a0f-4c9d-af8c-5a6f592aa5fb.wxs.aliquot_ensemble_masked.maf.gz  (23 KB)\n"}
+,{"stream_name":"stdout","time":94.342319859,"data":"  /kaggle/working/maf_files/b7950351-3e23-423f-b59d-4a3a0d411fa9/55899746-38e3-4a9c-87c2-dac4de6b693e.wxs.aliquot_ensemble_masked.maf.gz  (181 KB)\n"}
+,{"stream_name":"stdout","time":94.342323653,"data":"  /kaggle/working/maf_files/b7e50c64-0f35-4c1f-82cd-140b64b0b4b8/a34b1b60-ae5a-46a4-b0a2-f6d2366e4f9b.wxs.aliquot_ensemble_masked.maf.gz  (38 KB)\n"}
+,{"stream_name":"stdout","time":94.342327483,"data":"  /kaggle/working/maf_files/b80e27d4-4762-4290-b8d4-cf232350bd2e/dd1eddb2-1c8f-4645-9938-59f251836806.wxs.aliquot_ensemble_masked.maf.gz  (118 KB)\n"}
+,{"stream_name":"stdout","time":94.342331341,"data":"  /kaggle/working/maf_files/b931fc3c-3928-4737-8316-5832ec099b4f/abed1903-4541-4fa2-a274-079a88bee472.wxs.aliquot_ensemble_masked.maf.gz  (83 KB)\n"}
+,{"stream_name":"stdout","time":94.342335152,"data":"  /kaggle/working/maf_files/bacacd29-acff-4cb9-b4dd-fbbdfed97b07/6d9908fe-8922-43d7-a5c1-1f36a4024ec9.wxs.aliquot_ensemble_masked.maf.gz  (169 KB)\n"}
+,{"stream_name":"stdout","time":94.342339478,"data":"  /kaggle/working/maf_files/bbf4c985-1565-421f-9dbb-89cd9a1c40e2/5118f795-497e-459d-aadb-fa184e2ff416.wxs.aliquot_ensemble_masked.maf.gz  (109 KB)\n"}
+,{"stream_name":"stdout","time":94.342343604,"data":"  /kaggle/working/maf_files/bc0056c0-4e36-45ed-9c78-20aa0a0dba7b/782952ed-acef-475f-b35c-79f1a393c370.wxs.aliquot_ensemble_masked.maf.gz  (62 KB)\n"}
+,{"stream_name":"stdout","time":94.342348004,"data":"  /kaggle/working/maf_files/bc9ea226-6b5d-4214-86f6-e8fa3ae7a564/c1875b28-01c3-4271-94ce-23815e4bb1f4.wxs.aliquot_ensemble_masked.maf.gz  (14 KB)\n"}
+,{"stream_name":"stdout","time":94.342352332,"data":"  /kaggle/working/maf_files/be733141-d5f0-4e24-b512-2eaa9786d6ee/df1cc429-8eca-449c-83c4-8f0d69613bd1.wxs.aliquot_ensemble_masked.maf.gz  (108 KB)\n"}
+,{"stream_name":"stdout","time":94.342356203,"data":"  /kaggle/working/maf_files/bee4438b-3fbe-4a18-ba0e-749b7c399520/343bc0d2-67fc-4446-bfb7-1e1c57ace519.wxs.aliquot_ensemble_masked.maf.gz  (41 KB)\n"}
+,{"stream_name":"stdout","time":94.342375281,"data":"  /kaggle/working/maf_files/c1448109-b5b1-40cb-9427-099322af712f/5e1e9429-dfc2-47b0-963d-9b3152864ee8.wxs.aliquot_ensemble_masked.maf.gz  (65 KB)\n"}
+,{"stream_name":"stdout","time":94.342380189,"data":"  /kaggle/working/maf_files/c2da598c-2663-437d-847b-e0ae228c60fb/3445d00a-6639-4730-b12a-b7f9e225b32c.wxs.aliquot_ensemble_masked.maf.gz  (76 KB)\n"}
+,{"stream_name":"stdout","time":94.342385057,"data":"  /kaggle/working/maf_files/c386bb76-de34-4b20-b0c9-f03a8b5047bb/5d96a89e-554d-42d2-835e-660ba5f5a325.wxs.aliquot_ensemble_masked.maf.gz  (56 KB)\n"}
+,{"stream_name":"stdout","time":94.342392285,"data":"  /kaggle/working/maf_files/c3cc60c0-f902-4da8-b5fe-282004a710b0/2df6bd0b-430b-4804-a673-9439102f66bd.wxs.aliquot_ensemble_masked.maf.gz  (55 KB)\n"}
+,{"stream_name":"stdout","time":94.342399446,"data":"  /kaggle/working/maf_files/c3fc6691-992d-48cf-a376-9a122ae0c992/496f2027-253d-4c6f-a7db-db576af1d8fe.wxs.aliquot_ensemble_masked.maf.gz  (13 KB)\n"}
+,{"stream_name":"stdout","time":94.342403349,"data":"  /kaggle/working/maf_files/c53f2c29-fa87-40cd-a7b8-da1ea85523c5/f160b20c-f7d3-406e-90e0-2406cb7ab41d.wxs.aliquot_ensemble_masked.maf.gz  (71 KB)\n"}
+,{"stream_name":"stdout","time":94.342407652,"data":"  /kaggle/working/maf_files/c55bd532-2a60-4066-9be0-5f6d1e54cb05/b9e30476-a9de-4dfa-8e62-75aaee9847d3.wxs.aliquot_ensemble_masked.maf.gz  (98 KB)\n"}
+,{"stream_name":"stdout","time":94.342411653,"data":"  /kaggle/working/maf_files/c603ba75-bf42-4ee3-bee4-ac848fdf7cd2/69e45844-c39e-4ab9-a09d-8e20273a5bb5.wxs.aliquot_ensemble_masked.maf.gz  (54 KB)\n"}
+,{"stream_name":"stdout","time":94.342415681,"data":"  /kaggle/working/maf_files/c75ce350-402d-4d1e-959e-e7a62c83f6c3/9b05be39-3c52-4e17-93d6-1a9c622c73d5.wxs.aliquot_ensemble_masked.maf.gz  (88 KB)\n"}
+,{"stream_name":"stdout","time":94.342419931,"data":"  /kaggle/working/maf_files/c7910d9c-92e7-4992-b68f-6a35a93ff6b7/f2cfacbc-a824-4568-89db-6aca0d06af74.wxs.aliquot_ensemble_masked.maf.gz  (35 KB)\n"}
+,{"stream_name":"stdout","time":94.342423801,"data":"  /kaggle/working/maf_files/cc56a73a-86b6-4289-9f1f-c4f86f3e9870/80d84e51-81ac-4eee-b33f-9aec47ac3ab8.wxs.aliquot_ensemble_masked.maf.gz  (53 KB)\n"}
+,{"stream_name":"stdout","time":94.342427666,"data":"  /kaggle/working/maf_files/cc865108-ace4-4af8-87bc-ad7b3f7b0d2a/3497b579-9a79-4507-94f8-d6f99ef06327.wxs.aliquot_ensemble_masked.maf.gz  (108 KB)\n"}
+,{"stream_name":"stdout","time":94.342431541,"data":"  /kaggle/working/maf_files/cd44bad1-37f5-4191-8915-7da80c02f565/ade64044-3918-4bdc-a392-3e0663bc4424.wxs.aliquot_ensemble_masked.maf.gz  (23 KB)\n"}
+,{"stream_name":"stdout","time":94.342435341,"data":"  /kaggle/working/maf_files/cd5571bd-0192-4e4b-af24-f1dcd1d80f74/5098297b-dbff-4450-b7e1-c4467e65b3ec.wxs.aliquot_ensemble_masked.maf.gz  (43 KB)\n"}
+,{"stream_name":"stdout","time":94.342439244,"data":"  /kaggle/working/maf_files/ce22aa4c-5954-4e6a-aeaa-416839ee9376/93ea1822-8a18-4c09-a0ab-e74225938a59.wxs.aliquot_ensemble_masked.maf.gz  (62 KB)\n"}
+,{"stream_name":"stdout","time":94.342443116,"data":"  /kaggle/working/maf_files/ce45d80b-ae25-4619-9f31-81183ad14a79/c981f20f-e70c-410b-b9a3-e731e1d14e84.wxs.aliquot_ensemble_masked.maf.gz  (24 KB)\n"}
+,{"stream_name":"stdout","time":94.342446888,"data":"  /kaggle/working/maf_files/cf79a7ae-62aa-495c-8b2d-befd3b88cd20/95e69daf-2637-4494-a39e-a554a51aba69.wxs.aliquot_ensemble_masked.maf.gz  (21 KB)\n"}
+,{"stream_name":"stdout","time":94.342450734,"data":"  /kaggle/working/maf_files/d0aef9a8-1d05-40c0-8225-e8ea61e5f8d3/5b04d9eb-98b0-4aff-8168-53a6b31bd9c5.wxs.aliquot_ensemble_masked.maf.gz  (111 KB)\n"}
+,{"stream_name":"stdout","time":94.342454646,"data":"  /kaggle/working/maf_files/d1b83294-f226-4a26-b60c-601ea22ba6b0/3fa2c611-fe96-41ec-8a00-2b46cd730896.wxs.aliquot_ensemble_masked.maf.gz  (29 KB)\n"}
+,{"stream_name":"stdout","time":94.342458889,"data":"  /kaggle/working/maf_files/d2403fa7-e05e-4622-aa92-8d4da98e3dc0/79c5f4d6-a845-4b38-a0e0-f356a19e58ee.wxs.aliquot_ensemble_masked.maf.gz  (61 KB)\n"}
+,{"stream_name":"stdout","time":94.342462707,"data":"  /kaggle/working/maf_files/d3d61acb-c135-4631-acec-8d4031093a70/6d1b211f-2212-49d0-8654-4550aefb9e59.wxs.aliquot_ensemble_masked.maf.gz  (353 KB)\n"}
+,{"stream_name":"stdout","time":94.342466513,"data":"  /kaggle/working/maf_files/daa62b29-d8fe-43eb-bb9c-669eaec73123/99cfabdf-62e3-484e-8d01-5af18b1663b3.wxs.aliquot_ensemble_masked.maf.gz  (32 KB)\n"}
+,{"stream_name":"stdout","time":94.342473396,"data":"  /kaggle/working/maf_files/dd5b1acd-5149-4251-829d-111dbcbc1111/683228c7-dcd6-430f-88f5-a1afeacb5ffe.wxs.aliquot_ensemble_masked.maf.gz  (155 KB)\n"}
+,{"stream_name":"stdout","time":94.342477649,"data":"  /kaggle/working/maf_files/de548eba-a556-440e-a7d1-8a116bfb5cbd/29ef1b63-e1a7-405b-98a9-026de5d27ec2.wxs.aliquot_ensemble_masked.maf.gz  (10 KB)\n"}
+,{"stream_name":"stdout","time":94.342481491,"data":"  /kaggle/working/maf_files/df6156a5-6f74-4dce-8f2e-8f98550c6b6c/90ea3402-5438-48d7-8195-7207a5b4ab98.wxs.aliquot_ensemble_masked.maf.gz  (150 KB)\n"}
+,{"stream_name":"stdout","time":94.342485323,"data":"  /kaggle/working/maf_files/e07a5517-ab7e-4367-971b-7719c3273a1c/b342cdbc-5af1-4ed9-baf3-d7c129ee75a7.wxs.aliquot_ensemble_masked.maf.gz  (20 KB)\n"}
+,{"stream_name":"stdout","time":94.34248912300001,"data":"  /kaggle/working/maf_files/e0afe821-cb8e-487a-8fe5-92e7f9e3d137/84974264-b654-4f88-bdd4-0ee18f90d7d8.wxs.aliquot_ensemble_masked.maf.gz  (76 KB)\n"}
+,{"stream_name":"stdout","time":94.342492965,"data":"  /kaggle/working/maf_files/e2025176-89e8-4afd-8e08-3b89c336e0c2/960c38ee-03c4-4b33-8085-974c58cf6d83.wxs.aliquot_ensemble_masked.maf.gz  (104 KB)\n"}
+,{"stream_name":"stdout","time":94.342496811,"data":"  /kaggle/working/maf_files/e26d6530-33a4-4f91-9d84-40ad0f2b5ea3/6f9e9418-1056-4c47-b559-d4b08cbe4d33.wxs.aliquot_ensemble_masked.maf.gz  (1 KB)\n"}
+,{"stream_name":"stdout","time":94.342501416,"data":"  /kaggle/working/maf_files/e3ceae3d-740d-429c-9627-6d6a6ec77947/00c2e7e1-5cac-4ff6-84ac-68d01caf2bd3.wxs.aliquot_ensemble_masked.maf.gz  (188 KB)\n"}
+,{"stream_name":"stdout","time":94.342505398,"data":"  /kaggle/working/maf_files/e5900ade-7e1e-4cd0-a857-a2571472733d/f52a503c-8fb9-457c-addc-6b643b15d77c.wxs.aliquot_ensemble_masked.maf.gz  (145 KB)\n"}
+,{"stream_name":"stdout","time":94.342509167,"data":"  /kaggle/working/maf_files/e59b5718-84f4-48d1-9e79-c7e70b5b4a25/9f7ab8bc-e2a2-4e20-b0c2-ab9cdc605f95.wxs.aliquot_ensemble_masked.maf.gz  (15 KB)\n"}
+,{"stream_name":"stdout","time":94.342513291,"data":"  /kaggle/working/maf_files/e681dafb-5643-465e-b2ad-b0f546e073a4/c8e7bc76-1055-4d13-b0c2-789f75e40796.wxs.aliquot_ensemble_masked.maf.gz  (241 KB)\n"}
+,{"stream_name":"stdout","time":94.34251704,"data":"  /kaggle/working/maf_files/eb3743c1-f5ac-4003-8fe3-7b6170dfbc78/8fe36903-14d0-481a-af5f-b50b10327bba.wxs.aliquot_ensemble_masked.maf.gz  (149 KB)\n"}
+,{"stream_name":"stdout","time":94.342520899,"data":"  /kaggle/working/maf_files/edf20538-8946-4b5d-963a-c6e86b8ff11e/e5f3a9e2-129f-4907-9896-a06522bfa165.wxs.aliquot_ensemble_masked.maf.gz  (30 KB)\n"}
+,{"stream_name":"stdout","time":94.342524757,"data":"  /kaggle/working/maf_files/f09a0f5c-d15f-40c1-b60a-586f4b4f7701/a5e85aa5-64db-4a3e-9419-aad9bba12488.wxs.aliquot_ensemble_masked.maf.gz  (57 KB)\n"}
+,{"stream_name":"stdout","time":94.342528544,"data":"  /kaggle/working/maf_files/f3eb5735-f240-4024-ba48-9036aa5049b3/8ac0b413-d138-4acf-b5aa-cbba131cde2c.wxs.aliquot_ensemble_masked.maf.gz  (68 KB)\n"}
+,{"stream_name":"stdout","time":94.3425329,"data":"  /kaggle/working/maf_files/f412cb0d-3502-40eb-aad0-f0ca27986ae0/59ee2866-a2d5-4544-804b-005bf4aee445.wxs.aliquot_ensemble_masked.maf.gz  (29 KB)\n"}
+,{"stream_name":"stdout","time":94.342536809,"data":"  /kaggle/working/maf_files/f50e5b1c-99bc-4e7e-8f39-5f421c4ea2fd/54c096ab-2dd8-4b48-a9b8-2254714ee5ea.wxs.aliquot_ensemble_masked.maf.gz  (15 KB)\n"}
+,{"stream_name":"stdout","time":94.342540575,"data":"  /kaggle/working/maf_files/f56b0c73-f6b2-4c84-84f2-d2f3e817da7c/29705d55-0d2a-445e-9ecf-0b91e48d9c79.wxs.aliquot_ensemble_masked.maf.gz  (190 KB)\n"}
+,{"stream_name":"stdout","time":94.342544444,"data":"  /kaggle/working/maf_files/f7a36ec5-b563-4c0d-9bbf-a738c9db06c0/59494bb2-eb5d-477e-9c09-86caecf3b73a.wxs.aliquot_ensemble_masked.maf.gz  (83 KB)\n"}
+,{"stream_name":"stdout","time":94.342551368,"data":"  /kaggle/working/maf_files/f835c7f5-8be9-4a5d-a07d-df568a883dac/0ced268a-0c3c-4204-bf7b-d6ed35fb9423.wxs.aliquot_ensemble_masked.maf.gz  (61 KB)\n"}
+,{"stream_name":"stdout","time":94.342555249,"data":"  /kaggle/working/maf_files/f8a15a3a-3de9-4d52-8db3-c4c8eed7d188/416a2436-c5f4-4fae-a3e2-f1c3729b16fe.wxs.aliquot_ensemble_masked.maf.gz  (252 KB)\n"}
+,{"stream_name":"stdout","time":94.342559591,"data":"  /kaggle/working/maf_files/f9588875-a849-4a35-a90d-d96d402c3a88/83a6a9b7-fb06-41a6-b299-2d75adaf8528.wxs.aliquot_ensemble_masked.maf.gz  (63 KB)\n"}
+,{"stream_name":"stdout","time":94.342563441,"data":"  /kaggle/working/maf_files/fbee4520-dde8-431b-8e7d-62ea26097dd7/ec6ebe80-e3ba-4fa2-8ec6-dbe6401125e1.wxs.aliquot_ensemble_masked.maf.gz  (21 KB)\n"}
+,{"stream_name":"stdout","time":94.342567307,"data":"  /kaggle/working/maf_files/fce00398-a6be-4c15-80d3-f9fd3c7c5056/a2706af2-2c35-4684-83b5-ecf3eabdbde7.wxs.aliquot_ensemble_masked.maf.gz  (84 KB)\n"}
+,{"stream_name":"stdout","time":94.342577968,"data":"  /kaggle/working/maf_files/fd356323-7ae6-4429-a8ea-a5572c44301c/9b4ad7cb-594a-4876-b218-e4303162246f.wxs.aliquot_ensemble_masked.maf.gz  (31 KB)\n"}
+,{"stream_name":"stdout","time":94.342581956,"data":"  /kaggle/working/maf_files/fd460fa4-1c27-4f4f-ba40-6e0bc0857bd5/07bbadef-2815-4742-a5d4-ec8af2b9610f.wxs.aliquot_ensemble_masked.maf.gz  (65 KB)\n"}
+,{"stream_name":"stdout","time":94.342585751,"data":"  /kaggle/working/maf_files/fde996d6-190e-4084-9b51-ab8b9e9ceea6/f4899380-8783-4cdb-93fb-862e8f9ff402.wxs.aliquot_ensemble_masked.maf.gz  (53 KB)\n"}
+,{"stream_name":"stdout","time":94.342589591,"data":"  /kaggle/working/maf_files/ffc4b353-7444-4aa7-9475-91eb3b999227/565656ba-031b-43a3-a339-a4b444358def.wxs.aliquot_ensemble_masked.maf.gz  (90 KB)\n"}
+,{"stream_name":"stdout","time":94.342593461,"data":"  /kaggle/working/oncoseq_summary.json  (1 KB)\n"}
+,{"stream_name":"stdout","time":94.342596918,"data":"  /kaggle/working/pathway_analysis.csv  (0 KB)\n"}
+,{"stream_name":"stdout","time":94.342600451,"data":"  /kaggle/working/patient_clinical_report.csv  (1 KB)\n"}
+,{"stream_name":"stdout","time":94.342604373,"data":"  /kaggle/working/tcga_luad_merged.maf  (101737 KB)\n"}
+,{"stream_name":"stderr","time":99.792573316,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":99.792609614,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":99.957513424,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":99.957555769,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":100.693537472,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":100.776438433,"data":"[NbConvertApp] Writing 80825 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":103.263829938,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":103.893942538,"data":"[NbConvertApp] Writing 457748 bytes to __results__.html\n"}
+]
