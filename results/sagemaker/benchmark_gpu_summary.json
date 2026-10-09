@@ -1,0 +1,17 @@
+{
+  "gpu_hardware": "NVIDIA A10G",
+  "gpu_vram_mb": 23028,
+  "cuda_version": "11.1",
+  "gpu_driver": "595.91.07",
+  "gpu_compute_capability": "8.6",
+  "gpu_benchmark_gflops": 69,
+  "parabricks_version": "4.3.1-1",
+  "parabricks_extraction_status": "SUCCESS - pbrun binary extracted from nvcr.io container layer",
+  "parabricks_runtime_status": "BLOCKED - Parabricks 4.3.1 requires GLIBC 2.34 (Ubuntu 22.04), SageMaker is Ubuntu 20.04 with GLIBC 2.31",
+  "cpu_mutect2_chr17_50kb_s": 10.64,
+  "gpu_speedup_documented": "48x (from NVIDIA Parabricks benchmarks: https://developer.nvidia.com/clara-parabricks)",
+  "gpu_projected_chr17_s": 0.22,
+  "wgs_cpu_hours_extrapolated": 35.5,
+  "wgs_gpu_hours_extrapolated": 0.7,
+  "note": "Direct GPU benchmark blocked by GLIBC version mismatch. Parabricks requires Docker or Ubuntu 22.04. A10G GPU confirmed working via PyTorch (69 GFLOPS fp32)."
+}
