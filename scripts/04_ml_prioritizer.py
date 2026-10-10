@@ -211,74 +211,80 @@ def train_rf_xgb(X, y_labels, feature_names, groups):
     rf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=42, n_jobs=6)
     xgb = GradientBoostingClassifier(n_estimators=200, max_depth=4, learning_rate=0.05, random_state=42)
 
-    cv = GroupKFold(n_splits=5)
-
     if y_labels.sum() < 5:
         print("  Warning: too few positive labels for CV — using full dataset")
         rf.fit(X, y_labels)
         xgb.fit(X, y_labels)
         rf_auc, xgb_auc, rf_pr, xgb_pr = 0.0, 0.0, 0.0, 0.0
     else:
-        rf_aucs, xgb_aucs, rf_prs, xgb_prs = [], [], [], []
-        for train_idx, test_idx in cv.split(X, y_labels, groups):
-            if y_labels[train_idx].sum() == 0 or y_labels[test_idx].sum() == 0: continue
+        from sklearn.model_selection import KFold
+        
+        pooled_pr_aucs = []
+        unique_groups = np.unique(groups)
+        
+        train_rf_xgb.fold_stats = []
+        
+        for repeat_seed in range(10):
+            print(f"    Running repeat {repeat_seed + 1}/10...")
+            # Shuffle unique genes
+            rng = np.random.RandomState(repeat_seed)
+            shuffled_genes = rng.permutation(unique_groups)
             
-            rf.fit(X[train_idx], y_labels[train_idx])
-            xgb.fit(X[train_idx], y_labels[train_idx])
+            # Split into 5 folds
+            folds = np.array_split(shuffled_genes, 5)
             
-            rf_pred = rf.predict_proba(X[test_idx])[:, 1]
-            xgb_pred = xgb.predict_proba(X[test_idx])[:, 1]
+            oof_rf_pred = np.zeros(len(y_labels))
             
-            rf_aucs.append(roc_auc_score(y_labels[test_idx], rf_pred))
-            xgb_aucs.append(roc_auc_score(y_labels[test_idx], xgb_pred))
-            rf_prs.append(average_precision_score(y_labels[test_idx], rf_pred))
-            xgb_prs.append(average_precision_score(y_labels[test_idx], xgb_pred))
+            repeat_genes = []
             
-            # Record per-fold stats
-            test_y = y_labels[test_idx]
-            test_groups = groups[test_idx]
-            fold_genes_count = len(set(test_groups))
-            pos_count = test_y.sum()
-            
-            df_fold = pd.DataFrame({'gene': test_groups, 'y': test_y})
-            top_genes = df_fold[df_fold['y'] == 1].groupby('gene').size().sort_values(ascending=False).head(5)
-            top_genes_str = ", ".join([f"{k}({v})" for k, v in top_genes.items()])
-            
-            if not hasattr(train_rf_xgb, "fold_stats"):
-                train_rf_xgb.fold_stats = []
+            for fold_idx, test_genes in enumerate(folds):
+                test_mask = np.isin(groups, test_genes)
+                train_mask = ~test_mask
+                
+                rf.fit(X[train_mask], y_labels[train_mask])
+                oof_rf_pred[test_mask] = rf.predict_proba(X[test_mask])[:, 1]
+                
+                # Record stats for fold
+                test_y = y_labels[test_mask]
+                if test_y.sum() > 0:
+                    df_fold = pd.DataFrame({'gene': groups[test_mask], 'y': test_y})
+                    top_genes = df_fold[df_fold['y'] == 1].groupby('gene').size().sort_values(ascending=False).head(3)
+                    repeat_genes.extend([f"{k}({v})" for k, v in top_genes.items()])
+                    
+            # Compute pooled PR-AUC
+            pooled_pr = average_precision_score(y_labels, oof_rf_pred)
+            pooled_pr_aucs.append(pooled_pr)
             
             train_rf_xgb.fold_stats.append({
-                "fold": len(train_rf_xgb.fold_stats),
-                "genes_in_test": fold_genes_count,
-                "positives": int(pos_count),
-                "dominant_genes": top_genes_str,
-                "rf_auc": float(rf_aucs[-1]),
-                "rf_pr": float(rf_prs[-1])
+                "repeat": repeat_seed,
+                "pooled_pr_auc": float(pooled_pr),
+                "dominant_genes_in_folds": ", ".join(repeat_genes[:10])
             })
             
-        rf_auc = np.mean(rf_aucs)
-        xgb_auc = np.mean(xgb_aucs)
-        rf_pr = np.mean(rf_prs)
-        xgb_pr = np.mean(xgb_prs)
+        rf_pr_mean = np.mean(pooled_pr_aucs)
+        rf_pr_min = np.min(pooled_pr_aucs)
+        rf_pr_max = np.max(pooled_pr_aucs)
+        rf_pr_std = np.std(pooled_pr_aucs, ddof=1)
         
-        # CI calculation
         def ci(scores):
             m, se = np.mean(scores), stats.sem(scores)
             h = se * stats.t.ppf((1 + 0.95) / 2., len(scores)-1)
             return m, h
 
-        rf_auc_m, rf_auc_h = ci(rf_aucs)
-        xgb_auc_m, xgb_auc_h = ci(xgb_aucs)
-        rf_pr_m, rf_pr_h = ci(rf_prs)
-        xgb_pr_m, xgb_pr_h = ci(xgb_prs)
+        _, rf_pr_h = ci(pooled_pr_aucs)
         
         train_rf_xgb.metrics = {
-            "rf_auc_mean": float(rf_auc_m), "rf_auc_std": float(rf_auc_h),
-            "rf_pr_mean": float(rf_pr_m), "rf_pr_std": float(rf_pr_h)
+            "rf_pr_mean": float(rf_pr_mean),
+            "rf_pr_std_sample": float(rf_pr_std),
+            "rf_pr_95_ci_half_width": float(rf_pr_h),
+            "rf_pr_min": float(rf_pr_min),
+            "rf_pr_max": float(rf_pr_max)
         }
         
-        print(f"  RF  CV AUC: {rf_auc_m:.3f} ± {rf_auc_h:.3f}, PR-AUC: {rf_pr_m:.3f} ± {rf_pr_h:.3f}")
-        print(f"  XGB CV AUC: {xgb_auc_m:.3f} ± {xgb_auc_h:.3f}, PR-AUC: {xgb_pr_m:.3f} ± {xgb_pr_h:.3f}")
+        print(f"  RF Pooled PR-AUC (10 repeats): Mean {rf_pr_mean:.3f} ± {rf_pr_h:.3f} (95% CI) | Min {rf_pr_min:.3f} | Max {rf_pr_max:.3f}")
+        
+        rf_auc, xgb_auc = 0.0, 0.0 # Bypassed to focus on PR-AUC
+
         
         rf.fit(X, y_labels)
         xgb.fit(X, y_labels)
@@ -402,12 +408,11 @@ def main():
     final_metrics_path = WORK / "final_metrics.json"
     with open(final_metrics_path, "w") as f:
         json.dump({
-            "model_name": "Hotspot Prioritizer (CancerHotspots)",
-            "rf_cv_auc": {"mean": getattr(train_rf_xgb, "metrics", {}).get("rf_auc_mean", 0), "std": getattr(train_rf_xgb, "metrics", {}).get("rf_auc_std", 0)},
-            "rf_cv_pr_auc": {"mean": getattr(train_rf_xgb, "metrics", {}).get("rf_pr_mean", 0), "std": getattr(train_rf_xgb, "metrics", {}).get("rf_pr_std", 0)},
+            "model_name": "Hotspot Prioritizer (CancerHotspots) - 10 Repeats Pooled",
+            "rf_pooled_pr_auc": getattr(train_rf_xgb, "metrics", {}),
             "positive_labels": int(y_true.sum()),
             "total_variants": len(df),
-            "fold_stats": getattr(train_rf_xgb, "fold_stats", [])
+            "repeat_stats": getattr(train_rf_xgb, "fold_stats", [])
         }, f, indent=4)
         
     print(f"Final metrics saved to {final_metrics_path}")

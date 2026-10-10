@@ -1,13 +1,13 @@
 # Agent Changelog — Annotation Gaps Fixes
 
 ## 1. Gap 1: ML Target Leakage (AUC = 1.0)
-- **Fix:** Dropped the calculated label. Introduced a new, strictly independent label by downloading the `CancerHotspots.org` (v2) curated database. The task is now to predict if a variant is a true known hotspot. The resulting baseline RF CV AUC is 0.987 with a PR-AUC of 0.268 (on 248 positive labels vs a random baseline PR-AUC of 0.004).
+- **Fix:** Dropped the calculated label. Introduced a new, strictly independent label by downloading the `CancerHotspots.org` (v2) curated database. The task is now to predict if a variant is a true known hotspot. The resulting baseline RF 10-repeat Pooled PR-AUC is 0.258 ± 0.024 (on 248 positive labels vs a random baseline PR-AUC of 0.004).
 - **Ablation & Metrics:** 
-  - **Full Features:** RF CV AUC 0.987, PR-AUC 0.268. The task is highly imbalanced (248 positive examples out of 62k; Baseline PR: 0.004).
-  - **Without COSMIC:** CV AUC 0.983, PR-AUC 0.216 (Confirms performance isn't just relying on COSMIC as a leak).
-  - **Without COSMIC & driver_tier:** CV AUC 0.808, PR-AUC 0.023 (Model fails without gene-level priors).
+  - **Full Features:** RF Pooled PR-AUC 0.258 ± 0.024 (95% CI half-width). The task is highly imbalanced (248 positive examples out of ~62k; Baseline PR: 0.004).
+  - **Without COSMIC:** PR-AUC 0.222 (Confirms performance isn't just relying on COSMIC as a leak).
+  - **Without COSMIC & driver_tier:** PR-AUC 0.024 (Model fails without gene-level priors).
   - **Baselines:** Missense only gives PR-AUC 0.005. `driver_tier` only gives PR-AUC 0.092.
-  - **PR-AUC Variance (±0.252):** Explained by `GroupKFold` grouping by gene. Fold 2 has 108 positives (dominated by TP53 with 79), Fold 4 has 88 positives (dominated by KRAS with 60), while Folds 0 and 3 have 9 and 10 positives respectively.
+  - **PR-AUC Variance Fix:** The previous ±0.252 standard deviation issue was caused by `GroupKFold` clustering dominant positive genes (like TP53 with 79 positives and KRAS with 60) unevenly into folds. We replaced 5-fold CV reporting with a pooled 10-repeat out-of-fold PR-AUC.
 - **Limitation:** The task predicts a database label (CancerHotspots) that is available by lookup. "Hotspot" is not the same as "driver," and CancerHotspots overlaps with TCGA (where this GDC MAF likely originates).
 
 ## 2. Gap 2: Regex is_hotspot
@@ -37,4 +37,5 @@
 - **Decision:** Documented that ClinVar was excluded from features due to extreme sparsity (0.9% coverage). It is not useful for training the main ML prioritizer.
 
 ## 8. Gap 8: Reproducibility
-- **Fix:** Pinned only direct Python dependencies to `requirements.txt` (`pandas`, `numpy`, `scikit-learn`, `xgboost`, `scipy`), omitting shared-environment bloat. Set fixed `random_state=42` across ML models for determinism. Conducted a clean-clone re-run to verify metrics.
+- **Fix:** Pinned only direct Python dependencies to `requirements.txt`. Set fixed `random_state=42` across ML models for determinism. Conducted a clean-clone re-run to verify metrics.
+- **Git Tracking Cleanup:** Removed `tcga_luad_merged.maf`, `.tar.gz` archives, and `ml_prioritizer_scores.csv` from Git tracking using `git rm --cached` and ignored them in `.gitignore` to resolve repository bloat issues.

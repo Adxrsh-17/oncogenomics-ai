@@ -29,15 +29,32 @@ def main():
     cv = GroupKFold(n_splits=5)
     
     def evaluate(X, name):
-        rf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=42, n_jobs=6)
-        aucs, prs = [], []
-        for train_idx, test_idx in cv.split(X, y, groups):
-            if y[train_idx].sum() == 0 or y[test_idx].sum() == 0: continue
-            rf.fit(X[train_idx], y[train_idx])
-            pred = rf.predict_proba(X[test_idx])[:, 1]
-            aucs.append(roc_auc_score(y[test_idx], pred))
-            prs.append(average_precision_score(y[test_idx], pred))
-        print(f"{name:30s} | AUC: {np.mean(aucs):.3f} | PR-AUC: {np.mean(prs):.3f}")
+        from joblib import Parallel, delayed
+        unique_groups = np.unique(groups)
+        
+        def run_repeat(repeat_seed):
+            rng = np.random.RandomState(repeat_seed)
+            shuffled_genes = rng.permutation(unique_groups)
+            folds = np.array_split(shuffled_genes, 5)
+            
+            oof_pred = np.zeros(len(y))
+            rf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=42, n_jobs=1)
+            
+            for test_genes in folds:
+                test_mask = np.isin(groups, test_genes)
+                train_mask = ~test_mask
+                if y[train_mask].sum() == 0 or y[test_mask].sum() == 0:
+                    continue
+                rf.fit(X[train_mask], y[train_mask])
+                oof_pred[test_mask] = rf.predict_proba(X[test_mask])[:, 1]
+                
+            return average_precision_score(y, oof_pred)
+            
+        pooled_pr_aucs = Parallel(n_jobs=6, backend="threading")(delayed(run_repeat)(i) for i in range(10))
+            
+        m = np.mean(pooled_pr_aucs)
+        s = np.std(pooled_pr_aucs, ddof=1)
+        print(f"{name:30s} | PR-AUC: {m:.3f} ± {s:.3f} (std) | Min: {np.min(pooled_pr_aucs):.3f} | Max: {np.max(pooled_pr_aucs):.3f}")
 
     print(f"Random Baseline PR-AUC: {y.mean():.3f}\n")
     

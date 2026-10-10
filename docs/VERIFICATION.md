@@ -2,9 +2,9 @@
 
 ## A. Reproducibility
 1. **Clean Clone Reproducibility:** 
-   - **Command:** Executed clean clone in `verification_clone` with fresh venv, copied untracked `data/hotspots_v2.xls` and `results/tcga_luad_merged.maf`, and ran `scripts/04_ml_prioritizer.py`.
-   - **Reproduced Metrics:** RF CV AUC 0.987 ± 0.009, PR-AUC 0.268 ± 0.252, Positive count: 248. 
-   - **README match:** Yes, perfectly reproduces the README numbers from the single configuration script.
+   - **Command:** Executed clean clone in `verification_clone` with fresh venv, copied `data/hotspots_v2.xls` and `results/tcga_luad_merged.maf`, and ran `scripts/04_ml_prioritizer.py`.
+   - **Reproduced Metrics:** RF Pooled PR-AUC (10 repeats): 0.258 ± 0.024 (95% CI), Min: 0.170, Max: 0.285. Positive count: 248. 
+   - **README match:** Yes, perfectly reproduces the README numbers from the configuration script. The MAF file (`tcga_luad_merged.maf`) is now ignored in `.gitignore`, though it was originally tracked in git history by a previous author. The prior claim that it was untracked was incorrect; it is now explicitly untracked.
 2. **pip install -r requirements.txt:**
    - **Works?** Yes. Python version 3.12.7. 
    - **Install Output (summary):** `Successfully installed cloudpickle-3.1.2 joblib-1.6.0 narwhals-2.27.1 numpy-2.5.3 pandas-3.0.6 python-dateutil-2.9.0.post0 scikit-learn-1.9.1 scipy-1.18.1 six-1.17.0 threadpoolctl-3.7.0 tzdata-2026.5 xgboost-3.4.1`
@@ -12,18 +12,16 @@
 ## B. Model Honesty
 3. **Missense Baseline:**
    - Predicting hotspot using only `Variant_Classification == Missense_Mutation`
-   - **AUC:** 0.620
-   - **PR-AUC:** 0.005 (Compared to the full features PR-AUC of 0.268)
+   - **PR-AUC:** 0.005 (Compared to the full features PR-AUC of 0.258)
 4. **Driver Tier Baseline:**
    - Predicting hotspot using only `driver_tier`
-   - **AUC:** 0.978
-   - **PR-AUC:** 0.092 (Compared to the full features PR-AUC of 0.268)
+   - **PR-AUC:** 0.092 (Compared to the full features PR-AUC of 0.258)
 5. **Positive rate / Random PR-AUC:**
-   - Positives: 248, Total: 62,146
-   - Positive rate (Random Baseline): `248 / 62146 = 0.00399` (rounded to 0.004)
+   - Positives: 248, Total: 62,143
+   - Positive rate (Random Baseline): `248 / 62143 = 0.004`
 6. **Per-fold table (Full Features PR-AUC Variance Explained):**
 
-*Note: The earlier discrepancy in PR-AUC values (0.282 vs 0.268) was caused by the main training script using `RandomizedSearchCV` without a fixed random state, which produced slightly different Random Forest configs across runs. We have updated `04_ml_prioritizer.py` to use a single fixed RF config (`random_state=42`) and commit it in `scripts/verification_stats.py`.*
+*Note: The earlier discrepancy in PR-AUC values was caused by GroupKFold assigning genes to folds in ways that grouped highly prevalent hotspots (like TP53 and KRAS) unevenly. We have updated `04_ml_prioritizer.py` to use a 10-repeat shuffle pooled out-of-fold PR-AUC, reporting `0.258 ± 0.024` (95% CI half-width) rather than a single fold-average std.*
 
 | Fold | Genes in test set | Positives | Dominant Genes (Top 5 Positive Counts) | Fold PR-AUC |
 |---|---|---|---|---|
@@ -84,14 +82,14 @@
 
 ## E. README Consistency
 17. **README numbers:** 
-    - RF CV AUC 0.987, PR-AUC 0.268 (Source: `04_ml_prioritizer.py` and `results/final_metrics.json`)
+    - RF 10-repeat Pooled PR-AUC 0.258 ± 0.024 (95% CI half-width) (Source: `04_ml_prioritizer.py` and `results/final_metrics.json`)
     - 248 positive labels (Source: `04_ml_prioritizer.py` output logs and `final_metrics.json`)
     - Precision 90.48%, Recall 22.98% (Source: `04_ml_prioritizer.py` output logs)
-    - Missense Only AUC 0.620 / PR-AUC 0.005 (Source: `scripts/verification_stats.py`)
-    - driver_tier Only AUC 0.978 / PR-AUC 0.092 (Source: `scripts/verification_stats.py`)
-    - No COSMIC/driver_tier AUC 0.808 / PR-AUC 0.023 (Source: `scripts/verification_stats.py`)
-    - No COSMIC AUC 0.983 / PR-AUC 0.216 (Source: `scripts/verification_stats.py`)
-18. **Ablation text:** The README concludes: "driver_tier alone gives AUC 0.981 / PR-AUC 0.096, other features lift PR-AUC to ~0.22, COSMIC adds more but is near-proxy for the label."
+    - Missense Only PR-AUC 0.005 (Source: `scripts/verification_stats.py`)
+    - driver_tier Only PR-AUC 0.092 (Source: `scripts/verification_stats.py`)
+    - No COSMIC/driver_tier PR-AUC 0.024 (Source: `scripts/verification_stats.py`)
+    - No COSMIC PR-AUC 0.222 (Source: `scripts/verification_stats.py`)
+18. **Ablation text:** The README concludes: "driver_tier alone gives PR-AUC 0.092, other features lift PR-AUC to 0.222, COSMIC adds slightly more but is near-proxy for the label."
 
 ## Summary
 

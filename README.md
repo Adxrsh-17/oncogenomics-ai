@@ -210,13 +210,13 @@ dna/
 
 - **GPU direct timing blocked** by GLIBC 2.31 vs 2.34 (SageMaker Ubuntu 20.04). Fix: Docker with `--gpus all` on Ubuntu 22.04 base.
 - **ML Prioritizer Target Redefinition (Gap 1):** The initial AUC of 1.0 was caused by target leakage. The pipeline now predicts hotspot status using CancerHotspots.org (v2) as an independent ground-truth label.
-- **Model Performance & Features:**
+- **Model Performance & Features (10x Pooled Out-Of-Fold):**
   - **Baseline:** Random guessing yields a PR-AUC of 0.004.
-  - **Missense Baseline:** Using only `Variant_Classification == Missense_Mutation` yields AUC 0.620 / PR-AUC 0.005.
-  - **Gene Prior Baseline (`driver_tier` only):** Achieves AUC 0.978 / PR-AUC 0.092. The high AUC (~0.98) is almost entirely driven by the gene prior (hotspots only exist in cancer genes).
-  - **Ablation (No COSMIC, No driver_tier):** AUC 0.808 / PR-AUC 0.023.
-  - **No COSMIC:** AUC 0.983 / PR-AUC 0.216. Adding biological features (VAF, SIFT, PolyPhen, consequence) lifts the PR-AUC from 0.092 to ~0.22, providing real predictive lift beyond the gene prior.
-  - **Full Features:** AUC 0.987 / PR-AUC 0.268. Adding `COSMIC` lifts PR-AUC to ~0.27, but `COSMIC` is a near-proxy for recurrence and the label, so this lift should be treated with suspicion.
+  - **Missense Baseline:** Using only `Variant_Classification == Missense_Mutation` yields PR-AUC 0.005.
+  - **Gene Prior Baseline (`driver_tier` only):** Achieves PR-AUC 0.092. The model relies heavily on the gene prior (hotspots only exist in cancer genes).
+  - **Ablation (No COSMIC, No driver_tier):** PR-AUC 0.024.
+  - **No COSMIC:** PR-AUC 0.222. Adding biological features (VAF, SIFT, PolyPhen, consequence) lifts the PR-AUC from 0.092 to 0.222, providing real predictive lift beyond the gene prior.
+  - **Full Features:** Mean Pooled PR-AUC 0.258 ± 0.024 (95% CI). Adding `COSMIC` lifts PR-AUC slightly further, but `COSMIC` is a near-proxy for recurrence and the label, so this lift should be treated with suspicion.
 - **Task Utility Limitation:** The model now predicts a database label (CancerHotspots) that is already available by direct lookup. Thus, its primary utility is predicting *novel* hotspots not yet in the DB. Note that "hotspot" is not synonymous with "driver" (many truncating tumour suppressors are drivers but not hotspots).
 - **Dataset Overlap:** CancerHotspots (v2) was built partly from TCGA samples. Since our GDC cohort is TCGA-LUAD, there is an inherent overlap between the training dataset and the definition of the ground-truth label.
 - **Regex vs Curated Hotspots (Gap 2):** The old regex-based hotspot matched 63 variants vs 248 in CancerHotspots, yielding a Precision of 90.48% but a Recall of only 22.98% against the curated DB.
@@ -232,12 +232,12 @@ dna/
 ## Reproducing the Pipeline
 
 Since clinical and hotspot databases are frequently updated and subject to licensing, some inputs are untracked. To reproduce:
-1. **MAF (`tcga_luad_merged.maf`):** Place the merged TCGA-LUAD MAF inside the `results/` folder.
+1. **MAF (`tcga_luad_merged.maf`):** Place the merged TCGA-LUAD MAF inside the `results/` folder (it and `luad_maf.tar.gz` are ignored in Git to prevent bloat).
 2. **CancerHotspots (`data/hotspots.csv`):** Download the current hotspot list from [CancerHotspots.org](https://www.cancerhotspots.org/#/download) and place it in `data/`.
 3. **OncoKB / COSMIC List (`data/oncokb_cancer_gene_list.txt`):** Download the static gene list from `https://www.oncokb.org/api/v1/utils/cancerGeneList.txt` (no token required). Tier membership is defined by the `"OncoKB Annotated" == "Yes"` and `"COSMIC CGC" == "Yes"` columns.
 4. **Matching Logic:** Hotspots are matched strictly by **Gene + Residue Position**, not the exact amino acid change (e.g., a nonsense variant like TP53 Q331* counts as a match if position 331 is a hotspot).
 5. **gnomAD Parsing:** 86% of variants (53,744 of 62,146) have missing values in gnomAD (likely absent from the population). These are filled with `0`.
-
+6. **Per-variant Score Files:** Intermediate score files like `results/ml_prioritizer_scores.csv` are tracked in `.gitignore` due to size and should be regenerated locally using `scripts/04_ml_prioritizer.py`.
 ---
 
 ## Citations & Licensing
