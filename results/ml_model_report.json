@@ -1,8 +1,8 @@
 {
-  "rf_cv_auc": 0.6575,
-  "xgb_cv_auc": 0.6231,
+  "rf_cv_auc": 0.5465,
+  "xgb_cv_auc": 0.5454,
   "n_variants": 62146,
-  "n_positive_class": 449,
+  "n_positive_class": 3743,
   "features": [
     "vaf",
     "depth",
@@ -12,19 +12,19 @@
     "pop_af"
   ],
   "rf_feature_importance": {
-    "vaf": 0.1358,
-    "depth": 0.1143,
-    "clonality_score": 0.0081,
-    "is_snv": 0.0137,
-    "is_hotspot": 0.7282,
+    "vaf": 0.0668,
+    "depth": 0.0594,
+    "clonality_score": 0.0027,
+    "is_snv": 0.0276,
+    "is_hotspot": 0.8436,
     "pop_af": 0.0
   },
   "xgb_feature_importance": {
-    "vaf": 0.4803,
-    "depth": 0.2105,
-    "clonality_score": 0.0043,
-    "is_snv": 0.0597,
-    "is_hotspot": 0.2452,
+    "vaf": 0.1467,
+    "depth": 0.0646,
+    "clonality_score": 0.0,
+    "is_snv": 0.0354,
+    "is_hotspot": 0.7533,
     "pop_af": 0.0
   },
   "actionable_variants_found": 29

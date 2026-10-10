@@ -93,7 +93,17 @@ def build_feature_matrix(maf_df):
 
     # Driver gene score
     gene_col = "Hugo_Symbol" if "Hugo_Symbol" in df.columns else "Gene"
-    df["driver_tier"] = df[gene_col].apply(driver_tier)
+    df["driver_tier_legacy"] = df[gene_col].apply(driver_tier)
+    
+    # Load OncoKB for curated driver_tier
+    df["driver_tier"] = 0
+    oncokb_path = Path(__file__).resolve().parent.parent / "data" / "oncokb_cancer_gene_list.txt"
+    if oncokb_path.exists():
+        oncokb_df = pd.read_csv(oncokb_path, sep="\t")
+        oncokb_genes = set(oncokb_df[oncokb_df["OncoKB Annotated"] == "Yes"]["Hugo Symbol"])
+        df["driver_tier"] = df[gene_col].apply(lambda x: 2 if x in oncokb_genes else 0)
+    else:
+        df["driver_tier"] = df["driver_tier_legacy"]
 
     # Pathway membership
     df["pathway"] = df[gene_col].map(PATHWAY_MAP).fillna("Other")
@@ -104,14 +114,34 @@ def build_feature_matrix(maf_df):
     # Mutation type
     df["is_snv"] = (df["Variant_Type"] == "SNP").astype(float) if "Variant_Type" in df.columns else 1.0
 
-    # Known hotspot
+    # Known hotspot (regex)
     hotspot_set = {"G12C", "G12V", "G12D", "L858R", "V600E", "R175H", "R248W", "R248Q", "R273H"}
     if "HGVSp_Short" in df.columns:
-        df["is_hotspot"] = df["HGVSp_Short"].fillna("").apply(
+        df["is_hotspot_regex"] = df["HGVSp_Short"].fillna("").apply(
             lambda x: float(any(h in str(x) for h in hotspot_set))
         )
     else:
-        df["is_hotspot"] = 0.0
+        df["is_hotspot_regex"] = 0.0
+
+    # New curated source (CancerHotspots)
+    df["is_hotspot"] = 0.0
+    hotspots_path = Path(__file__).resolve().parent.parent / "data" / "hotspots.csv"
+    if hotspots_path.exists() and "HGVSp_Short" in df.columns:
+        import re
+        hotspots_df = pd.read_csv(hotspots_path)
+        hotspot_locs = set(zip(hotspots_df["Hugo_Symbol"], hotspots_df["Amino_Acid_Position"].astype(str)))
+        
+        def check_curated_hotspot(row):
+            hgvsp = str(row.get("HGVSp_Short", ""))
+            gene = str(row.get(gene_col, ""))
+            if not str(hgvsp).startswith("p."): return 0.0
+            match = re.search(r"p\.[A-Za-z]+(\d+)", str(hgvsp))
+            if match:
+                pos = match.group(1)
+                return float((gene, pos) in hotspot_locs)
+            return 0.0
+            
+        df["is_hotspot"] = df.apply(check_curated_hotspot, axis=1)
 
     # Population frequency proxy (ExAC/gnomAD — use 0 if not available as germline filter)
     if "ExAC_AF" in df.columns:
@@ -248,6 +278,10 @@ def main():
     print(f"\nModel report: {OUT_MODEL}")
     print(f"RF AUC: {rf_auc:.3f}  XGB AUC: {xgb_auc:.3f}")
     print(f"Actionable variants: {report['actionable_variants_found']}")
+    
+    # Report agreement between regex and curated hotspot
+    agreement = (df["is_hotspot"] == df["is_hotspot_regex"]).mean()
+    print(f"Hotspot Agreement (Regex vs Curated): {agreement:.2%}")
     print("=== DONE ===")
 
 if __name__ == "__main__":
