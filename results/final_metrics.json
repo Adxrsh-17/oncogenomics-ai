@@ -1,55 +1,64 @@
 {
-    "model_name": "Hotspot Prioritizer (CancerHotspots)",
-    "rf_cv_auc": {
-        "mean": 0.9867470866176362,
-        "std": 0.010995946297510556
-    },
-    "rf_cv_pr_auc": {
-        "mean": 0.2677331836749443,
-        "std": 0.25163456232503767
+    "model_name": "Hotspot Prioritizer (CancerHotspots) - 10 Repeats Pooled",
+    "rf_pooled_pr_auc": {
+        "rf_pr_mean": 0.2583111704260463,
+        "rf_pr_std_sample": 0.03371318376462806,
+        "rf_pr_95_ci_half_width": 0.024116958828284775,
+        "rf_pr_min": 0.1704177157742389,
+        "rf_pr_max": 0.2849650831799876
     },
     "positive_labels": 248,
     "total_variants": 62143,
-    "fold_stats": [
+    "repeat_stats": [
         {
-            "fold": 0,
-            "genes_in_test": 2843,
-            "positives": 4,
-            "dominant_genes": "MAP2K1(2), NOTCH1(1), RIT1(1)",
-            "rf_auc": 0.9752515090543259,
-            "rf_pr": 0.046157687541007505
+            "repeat": 0,
+            "pooled_pr_auc": 0.2849650831799876,
+            "dominant_genes_in_folds": "TP53(79), EGFR(21), SMAD4(2), PIK3CA(11), GNAS(3), MAP2K1(2), STK11(10), CDKN2A(3), NRAS(2), KRAS(60)"
         },
         {
-            "fold": 1,
-            "genes_in_test": 2845,
-            "positives": 40,
-            "dominant_genes": "EGFR(21), KEAP1(7), RARA(2), ARAF(2), ERBB2(2)",
-            "rf_auc": 0.9794717087739124,
-            "rf_pr": 0.19816741271393776
+            "repeat": 1,
+            "pooled_pr_auc": 0.2591306381904132,
+            "dominant_genes_in_folds": "GNAS(3), MAP2K1(2), RAF1(2), NFE2L2(8), RARA(2), AKT1(1), KRAS(60), PIK3CA(11), CDKN2A(3), TP53(79)"
         },
         {
-            "fold": 2,
-            "genes_in_test": 2845,
-            "positives": 113,
-            "dominant_genes": "TP53(79), STK11(10), NFE2L2(8), CTNNB1(3), RAF1(2)",
-            "rf_auc": 0.9921858608271275,
-            "rf_pr": 0.5153471518306232
+            "repeat": 2,
+            "pooled_pr_auc": 0.2762595397379927,
+            "dominant_genes_in_folds": "TP53(79), KEAP1(7), NRAS(2), NFE2L2(8), SMAD4(2), ATM(1), STK11(10), CDKN2A(3), RAF1(2), KRAS(60)"
         },
         {
-            "fold": 3,
-            "genes_in_test": 2844,
-            "positives": 13,
-            "dominant_genes": "CDKN2A(3), FBXW7(2), SOS1(2), RAD50(2), MAX(1)",
-            "rf_auc": 0.9911583382384832,
-            "rf_pr": 0.13443583448256047
+            "repeat": 3,
+            "pooled_pr_auc": 0.2684122468347687,
+            "dominant_genes_in_folds": "TP53(79), CTNNB1(3), SOS1(2), KRAS(60), EGFR(21), NFE2L2(8), PIK3CA(11), CDKN2A(3), ARAF(2), AKT1(1)"
         },
         {
-            "fold": 4,
-            "genes_in_test": 2845,
-            "positives": 78,
-            "dominant_genes": "KRAS(60), PIK3CA(11), GNAS(3), SMAD4(2), IRF4(1)",
-            "rf_auc": 0.9956680161943321,
-            "rf_pr": 0.44455783180659264
+            "repeat": 4,
+            "pooled_pr_auc": 0.27864887559776574,
+            "dominant_genes_in_folds": "KRAS(60), EGFR(21), PIK3CA(11), NFE2L2(8), RARA(2), SMAD4(2), TP53(79), ERBB2(2), RHOA(2), B2M(1)"
+        },
+        {
+            "repeat": 5,
+            "pooled_pr_auc": 0.1704177157742389,
+            "dominant_genes_in_folds": "PIK3CA(11), STK11(10), CDKN2A(3), TP53(79), KRAS(60), NFE2L2(8), ERBB2(2), RAF1(2), SMAD4(2), EGFR(21)"
+        },
+        {
+            "repeat": 6,
+            "pooled_pr_auc": 0.26494326194794926,
+            "dominant_genes_in_folds": "STK11(10), KEAP1(7), RARA(2), KRAS(60), ARAF(2), SOS1(2), PIK3CA(11), CTNNB1(3), SMAD4(2), TP53(79)"
+        },
+        {
+            "repeat": 7,
+            "pooled_pr_auc": 0.23631566130440587,
+            "dominant_genes_in_folds": "GNAS(3), FBXW7(2), B2M(1), EGFR(21), ARAF(2), ERBB2(2), TP53(79), PIK3CA(11), STK11(10), KRAS(60)"
+        },
+        {
+            "repeat": 8,
+            "pooled_pr_auc": 0.26691119852040357,
+            "dominant_genes_in_folds": "KRAS(60), STK11(10), KEAP1(7), ARAF(2), MAP2K1(2), RARA(2), EGFR(21), NFE2L2(8), SOS1(2), FBXW7(2)"
+        },
+        {
+            "repeat": 9,
+            "pooled_pr_auc": 0.27710748317253747,
+            "dominant_genes_in_folds": "KEAP1(7), ERBB2(2), ARAF(2), TP53(79), EGFR(21), CDKN2A(3), KRAS(60), PIK3CA(11), RAF1(2), STK11(10)"
         }
     ]
 }
