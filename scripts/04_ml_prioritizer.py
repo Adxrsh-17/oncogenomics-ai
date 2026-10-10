@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-WORK      = Path("/home/sai-nivedh-26/dna/results")
+WORK      = Path(__file__).resolve().parent.parent / "results"
 MAF_FILE  = WORK / "tcga_luad_merged.maf"
 REPORT    = WORK / "patient_clinical_report.csv"
 OUT_SCORES = WORK / "ml_prioritizer_scores.csv"
@@ -120,15 +120,15 @@ def build_feature_matrix(maf_df):
         df["pop_af"] = 0.0
 
     features = [
-        "vaf", "depth", "consequence_score", "driver_tier",
+        "vaf", "depth", 
         "clonality_score", "is_snv", "is_hotspot", "pop_af",
     ]
     return df, features, gene_col
 
-def train_rf_xgb(X, y_labels, feature_names):
+def train_rf_xgb(X, y_labels, feature_names, groups):
     """Train Random Forest and XGBoost on binary labels (driver=1, passenger=0)."""
     from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-    from sklearn.model_selection import StratifiedKFold, cross_val_score
+    from sklearn.model_selection import GroupKFold, cross_val_score
     from sklearn.preprocessing import LabelEncoder
     from sklearn.metrics import roc_auc_score
     import numpy as np
@@ -139,10 +139,10 @@ def train_rf_xgb(X, y_labels, feature_names):
     print(f"Training on {X.shape[0]} variants, {X.shape[1]} features")
     print(f"  Driver variants (y=1): {y_labels.sum()} / {len(y_labels)}")
 
-    rf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=42, n_jobs=-1)
+    rf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=42, n_jobs=6)
     xgb = GradientBoostingClassifier(n_estimators=200, max_depth=4, learning_rate=0.05, random_state=42)
 
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    cv = GroupKFold(n_splits=5)
 
     if y_labels.sum() < 5:
         print("  Warning: too few positive labels for CV — using full dataset")
@@ -151,8 +151,8 @@ def train_rf_xgb(X, y_labels, feature_names):
         rf_auc = 0.0
         xgb_auc = 0.0
     else:
-        rf_scores  = cross_val_score(rf,  X, y_labels, cv=cv, scoring="roc_auc")
-        xgb_scores = cross_val_score(xgb, X, y_labels, cv=cv, scoring="roc_auc")
+        rf_scores  = cross_val_score(rf,  X, y_labels, groups=groups, cv=cv, scoring="roc_auc")
+        xgb_scores = cross_val_score(xgb, X, y_labels, groups=groups, cv=cv, scoring="roc_auc")
         rf_auc  = rf_scores.mean()
         xgb_auc = xgb_scores.mean()
         print(f"  RF  CV AUC: {rf_auc:.3f} ± {rf_scores.std():.3f}")
@@ -190,9 +190,10 @@ def main():
     # Labels: tier-1 driver gene missense/nonsense = positive class
     y = ((df["driver_tier"] >= 1) & (df["consequence_score"] >= 7)).astype(int).values
     X = df[features].values
+    groups = df[gene_col].values
 
     # Train models
-    rf, xgb_model, rf_auc, xgb_auc, fi_rf, fi_xgb = train_rf_xgb(X, y, features)
+    rf, xgb_model, rf_auc, xgb_auc, fi_rf, fi_xgb = train_rf_xgb(X, y, features, groups)
 
     # Score all variants
     rf_prob  = rf.predict_proba(np.nan_to_num(X, nan=0.0))[:, 1]
