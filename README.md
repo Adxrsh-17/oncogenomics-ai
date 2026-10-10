@@ -14,7 +14,7 @@
 | Real-Reference BAM Generation | ✅ Complete | 5 chr17 regions, actual GRCh38 reference |
 | GATK4 Mutect2 Somatic Calling | ✅ Complete | v4.5.0.0, Java 17, FilterMutectCalls, 5/5 runs |
 | VEP Annotation of VCFs | ✅ Complete | Ensembl REST API, PASS variants annotated |
-| ML Prioritizer (RF + XGBoost) | ✅ Complete | Re-trained to predict CancerHotspots variants; RF CV AUC 0.987, PR-AUC 0.268 (on 248 positive labels) |
+| ML Prioritizer (RF + XGBoost) | ✅ Complete | Re-trained to predict CancerHotspots variants; RF CV AUC 0.989, Pooled PR-AUC 0.258 ± 0.024 (10-repeat, 248 positive labels, random baseline 0.004) |
 | Parabricks Extraction | ✅ Complete | pbrun 4.3.1-1 extracted from nvcr.io without Docker |
 | Direct GPU Wall-clock Benchmark | ⚠️ Blocked | GLIBC 2.31 (Ubuntu 20.04) vs required 2.34; GPU active (A10G, 69 GFLOPS via PyTorch) |
 | Interactive Dashboard + Viz | ✅ Complete | React + Vite, Pipeline / Cohort Analysis / GPU Benchmark / Results tabs |
@@ -210,12 +210,12 @@ dna/
 
 - **GPU direct timing blocked** by GLIBC 2.31 vs 2.34 (SageMaker Ubuntu 20.04). Fix: Docker with `--gpus all` on Ubuntu 22.04 base.
 - **ML Prioritizer Target Redefinition (Gap 1):** The initial AUC of 1.0 was caused by target leakage. The pipeline now predicts hotspot status using CancerHotspots.org (v2) as an independent ground-truth label.
-- **Model Performance & Features (10x Pooled Out-Of-Fold):**
+- **Model Performance & Features (10-repeat Pooled Out-Of-Fold, `verification_stats.py`):**
   - **Baseline:** Random guessing yields a PR-AUC of 0.004.
-  - **Missense Baseline:** Using only `Variant_Classification == Missense_Mutation` yields PR-AUC 0.005.
-  - **Gene Prior Baseline (`driver_tier` only):** Achieves PR-AUC 0.092. The model relies heavily on the gene prior (hotspots only exist in cancer genes).
-  - **Ablation (No COSMIC, No driver_tier):** PR-AUC 0.024.
-  - **No COSMIC:** PR-AUC 0.222. Adding biological features (VAF, SIFT, PolyPhen, consequence) lifts the PR-AUC from 0.092 to 0.222, providing real predictive lift beyond the gene prior.
+  - **Missense Baseline:** Using only `Variant_Classification == Missense_Mutation` yields PR-AUC 0.004.
+  - **Gene Prior Baseline (`driver_tier` only):** Achieves PR-AUC 0.074. The model relies heavily on the gene prior (hotspots only exist in cancer genes).
+  - **Ablation (No COSMIC, No driver_tier):** PR-AUC 0.015.
+  - **No COSMIC:** PR-AUC 0.199. Adding biological features (VAF, SIFT, PolyPhen, consequence) lifts the PR-AUC from 0.074 to 0.199, providing real predictive lift beyond the gene prior.
   - **Full Features:** Mean Pooled PR-AUC 0.258 ± 0.024 (95% CI). Adding `COSMIC` lifts PR-AUC slightly further, but `COSMIC` is a near-proxy for recurrence and the label, so this lift should be treated with suspicion.
 - **Task Utility Limitation:** The model now predicts a database label (CancerHotspots) that is already available by direct lookup. Thus, its primary utility is predicting *novel* hotspots not yet in the DB. Note that "hotspot" is not synonymous with "driver" (many truncating tumour suppressors are drivers but not hotspots).
 - **Dataset Overlap:** CancerHotspots (v2) was built partly from TCGA samples. Since our GDC cohort is TCGA-LUAD, there is an inherent overlap between the training dataset and the definition of the ground-truth label.
