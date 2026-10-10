@@ -1,12 +1,13 @@
 # Agent Changelog — Annotation Gaps Fixes
 
 ## 1. Gap 1: ML Target Leakage (AUC = 1.0)
-- **Fix:** Redefined the ML task entirely to prevent leakage. The model now predicts whether a variant is a true hotspot (label `y` = `is_hotspot` from CancerHotspots.org) using biological features. `driver_tier` and `consequence_score` are now used strictly as features, not labels. `GroupKFold` grouped by gene is maintained.
+- **Fix:** Dropped the calculated label. Introduced a new, strictly independent label by downloading the `CancerHotspots.org` (v2) curated database. The task is now to predict if a variant is a true known hotspot. The resulting baseline RF CV AUC is 0.987 with a PR-AUC of 0.268 (on 248 positive labels vs a random baseline PR-AUC of 0.004).
 - **Ablation & Metrics:** 
-  - **Full Features:** RF CV AUC 0.987, PR-AUC 0.268. The task is highly imbalanced (248 positive examples out of 62k; Baseline PR: 0.0040).
-  - **Without COSMIC:** CV AUC 0.990, PR-AUC 0.222 (Confirms performance isn't just relying on COSMIC as a leak).
-  - **Without COSMIC & driver_tier:** CV AUC 0.806, PR-AUC 0.024 (Model fails without gene-level priors).
-  - **PR-AUC Variance (±0.252):** Explained by `GroupKFold` grouping by gene. Fold 2 has 108 positives (dominated by TP53 with 79), Fold 4 has 88 positives (dominated by KRAS with 60), while Folds 0 and 3 have <10 positives.
+  - **Full Features:** RF CV AUC 0.987, PR-AUC 0.268. The task is highly imbalanced (248 positive examples out of 62k; Baseline PR: 0.004).
+  - **Without COSMIC:** CV AUC 0.983, PR-AUC 0.216 (Confirms performance isn't just relying on COSMIC as a leak).
+  - **Without COSMIC & driver_tier:** CV AUC 0.808, PR-AUC 0.023 (Model fails without gene-level priors).
+  - **Baselines:** Missense only gives PR-AUC 0.005. `driver_tier` only gives PR-AUC 0.092.
+  - **PR-AUC Variance (±0.252):** Explained by `GroupKFold` grouping by gene. Fold 2 has 108 positives (dominated by TP53 with 79), Fold 4 has 88 positives (dominated by KRAS with 60), while Folds 0 and 3 have 9 and 10 positives respectively.
 - **Limitation:** The task predicts a database label (CancerHotspots) that is available by lookup. "Hotspot" is not the same as "driver," and CancerHotspots overlaps with TCGA (where this GDC MAF likely originates).
 
 ## 2. Gap 2: Regex is_hotspot
