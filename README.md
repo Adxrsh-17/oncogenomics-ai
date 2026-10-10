@@ -206,16 +206,29 @@ dna/
 | GPU speedup (literature) | 56.8× for Mutect2 somatic; 36h → 38min WGS | fig3, fig7 |
 | KRAS+TP53 co-mutation | Frequent in target cohort — reduced inhibitor response | fig6 |
 
----
-
 ## Known Limitations & Recent Fixes
 
 - **GPU direct timing blocked** by GLIBC 2.31 vs 2.34 (SageMaker Ubuntu 20.04). Fix: Docker with `--gpus all` on Ubuntu 22.04 base.
-- **ML Prioritizer Target Redefinition (Gap 1):** The initial AUC of 1.0 was caused by target leakage (label was defined from features). The pipeline has been overhauled to use CancerHotspots.org (v2) as the independent ground-truth label, redefining the task to predicting hotspot status. This yields an honest RF CV AUC of 0.987 and a PR-AUC of 0.268 (highly imbalanced: 248 positive examples out of 62k).
-- **Driver Gene Tiers (Gap 3):** Replaced hardcoded gene lists with a dynamic lookup using the OncoKB Cancer Gene List API (public utilities API, no token required).
-- **New Features (Gap 6):** SIFT, PolyPhen, Caller counts, and COSMIC recurrence have been parsed and added to the feature set. COSMIC is highly predictive of hotspots (as both reflect recurrence) but not perfectly circular (FP rate exists).
+- **ML Prioritizer Target Redefinition (Gap 1):** The initial AUC of 1.0 was caused by target leakage (label was defined from features). The pipeline has been overhauled to use CancerHotspots.org (v2) as the independent ground-truth label, redefining the task to predicting hotspot status. 
+- **ML Performance & Ablation:** 
+  - **Full Features:** RF CV AUC 0.987, PR-AUC 0.268 (on 248 positive labels; Baseline PR: 0.004).
+  - **Without COSMIC feature:** CV AUC 0.984, PR-AUC 0.246 (Proving the model is not relying on the COSMIC feature as a leak).
+  - **The high PR-AUC standard deviation (±0.252)** across folds is a natural artifact of `GroupKFold` grouped by gene: Fold 2 is dominated by `TP53` (79 hotspots), Fold 4 is dominated by `KRAS` (60 hotspots), while other folds have <15 positive labels.
+- **Task Utility Limitation:** The model now predicts a database label (CancerHotspots) that is already available by direct lookup. Thus, its primary utility is predicting *novel* hotspots not yet in the DB. Note that "hotspot" is not synonymous with "driver" (many truncating tumour suppressors are drivers but not hotspots).
+- **Dataset Overlap:** CancerHotspots (v2) was built partly from TCGA samples. Since our GDC cohort is TCGA-LUAD, there is an inherent overlap between the training dataset and the definition of the ground-truth label.
+- **Regex vs Curated Hotspots (Gap 2):** The old regex-based hotspot matched 63 variants vs 248 in CancerHotspots, yielding a Precision of 90.48% but a Recall of only 22.98% against the curated DB.
+- **Driver Gene Tiers (Gap 3):** Replaced hardcoded gene lists with a dynamic lookup using the OncoKB Cancer Gene List.
+- **New Features (Gap 6):** SIFT, PolyPhen, Caller counts, and COSMIC recurrence have been parsed and added to the feature set.
 - **Branch B recall = 0%** because synthetic BAMs lack matched normal — real tumour-normal pairs needed.
 - **VAF clonality** is not purity-corrected; raw thresholds underestimate clonal fraction.
 - **TTN/MUC16 in top genes** are passenger size-bias artefacts, not drivers.
-- **Hotspot Annotation (Gap 5):** The native GDC MAF `hotspot` column uses `'Y'` (253 counts) and `'N'` rather than boolean formatting, breaking earlier parsers. 
-- **Regex vs Curated Hotspots (Gap 2):** The old regex-based hotspot matched 63 variants vs 248 in CancerHotspots, yielding a Precision of 90.48% but a Recall of only 22.98% against the curated DB.
+- **Hotspot Annotation (Gap 5):** The native GDC MAF `hotspot` column uses `'Y'` (253 counts) and `'N'` rather than boolean formatting, breaking earlier parsers.
+
+---
+
+## Citations & Licensing
+
+- **OncoKB:** The OncoKB Cancer Gene List was downloaded via the public OncoKB Utilities API (`https://www.oncokb.org/api/v1/utils/cancerGeneList.txt`), which does not require a token for the static gene list. However, OncoKB is a proprietary database (Memorial Sloan Kettering Cancer Center) and requires a registered license for commercial use; academic research use is free. 
+- **COSMIC CGC:** The COSMIC Cancer Gene Census (v99) status was derived entirely from the OncoKB gene list file. We did not independently scrape or download COSMIC (which strictly requires a registered login and institutional licensing). 
+- **CancerHotspots:** Sourced from `CancerHotspots.org` (v2).
+
