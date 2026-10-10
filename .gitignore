@@ -1,1 +1,12 @@
 .venv/
+venv/
+test_env/
+verification_clone/
+__pycache__/
+*.pyc
+diff_*.txt
+.env
+results/tcga_luad_merged.maf
+results/luad_maf.tar.gz
+results/maf_files/
+results/ml_prioritizer_scores.csv

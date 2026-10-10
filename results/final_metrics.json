@@ -1,0 +1,12 @@
+{
+    "pooled_pr_auc_mean": 0.2583111704260463,
+    "95_ci_half_width": 0.024116958828284775,
+    "min": 0.1704177157742389,
+    "max": 0.2849650831799876,
+    "repeats": 10,
+    "positives": 248,
+    "total": 62143,
+    "baseline_pr_auc": 0.003990795423458797,
+    "pooled_auc": 0.9890446848069964,
+    "model_report": "results/ml_model_report.json"
+}

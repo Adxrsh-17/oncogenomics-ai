@@ -6,16 +6,22 @@ Features: VAF, depth, functional consequence, pathway relevance,
 Input:  results/patient_clinical_report.csv + results/pathway_analysis.csv + MAF
 Output: results/ml_prioritizer_scores.csv + model performance report
 """
-import json, sys, subprocess
+import json, sys, subprocess, os
 from pathlib import Path
 import numpy as np
 import pandas as pd
 
-WORK      = Path("/home/sai-nivedh-26/dna/results")
+os.environ['OMP_NUM_THREADS'] = '6'
+os.environ['MKL_NUM_THREADS'] = '6'
+os.environ['OPENBLAS_NUM_THREADS'] = '6'
+
+WORK      = Path(__file__).resolve().parent.parent / "results"
 MAF_FILE  = WORK / "tcga_luad_merged.maf"
 REPORT    = WORK / "patient_clinical_report.csv"
 OUT_SCORES = WORK / "ml_prioritizer_scores.csv"
 OUT_MODEL  = WORK / "ml_model_report.json"
+
+GNOMAD_MAX_AF_THRESH = 0.001
 
 # ---------- known cancer driver genes for scoring ----------
 TIER1_DRIVERS = {
@@ -93,7 +99,32 @@ def build_feature_matrix(maf_df):
 
     # Driver gene score
     gene_col = "Hugo_Symbol" if "Hugo_Symbol" in df.columns else "Gene"
-    df["driver_tier"] = df[gene_col].apply(driver_tier)
+    df["driver_tier_legacy"] = df[gene_col].apply(driver_tier)
+    
+    # Load OncoKB for curated driver_tier
+    df["driver_tier"] = 0
+    oncokb_path = Path(__file__).resolve().parent.parent / "data" / "oncokb_cancer_gene_list.txt"
+    if oncokb_path.exists():
+        oncokb_df = pd.read_csv(oncokb_path, sep="\t")
+        oncokb_annotated = set(oncokb_df[oncokb_df["OncoKB Annotated"] == "Yes"]["Hugo Symbol"])
+        cosmic_cgc = set(oncokb_df[oncokb_df["COSMIC CGC (v99)"] == "Yes"]["Hugo Symbol"])
+        
+        def assign_tier(g):
+            if g in oncokb_annotated and g in cosmic_cgc: return 2
+            if g in oncokb_annotated or g in cosmic_cgc: return 1
+            return 0
+        df["driver_tier"] = df[gene_col].apply(assign_tier)
+    else:
+        df["driver_tier"] = df["driver_tier_legacy"]
+
+    # Consequence score
+    CONSEQUENCE_MAP = {
+        "Nonsense_Mutation": 8, "Splice_Site": 7, "Missense_Mutation": 5,
+        "In_Frame_Del": 4, "In_Frame_Ins": 4,
+        "Frame_Shift_Del": 6, "Frame_Shift_Ins": 6,
+        "Silent": 1
+    }
+    df["consequence_score"] = df["Variant_Classification"].map(CONSEQUENCE_MAP).fillna(0)
 
     # Pathway membership
     df["pathway"] = df[gene_col].map(PATHWAY_MAP).fillna("Other")
@@ -104,14 +135,34 @@ def build_feature_matrix(maf_df):
     # Mutation type
     df["is_snv"] = (df["Variant_Type"] == "SNP").astype(float) if "Variant_Type" in df.columns else 1.0
 
-    # Known hotspot
+    # Known hotspot (regex)
     hotspot_set = {"G12C", "G12V", "G12D", "L858R", "V600E", "R175H", "R248W", "R248Q", "R273H"}
     if "HGVSp_Short" in df.columns:
-        df["is_hotspot"] = df["HGVSp_Short"].fillna("").apply(
+        df["is_hotspot_regex"] = df["HGVSp_Short"].fillna("").apply(
             lambda x: float(any(h in str(x) for h in hotspot_set))
         )
     else:
-        df["is_hotspot"] = 0.0
+        df["is_hotspot_regex"] = 0.0
+
+    # New curated source (CancerHotspots)
+    df["is_hotspot"] = 0.0
+    hotspots_path = Path(__file__).resolve().parent.parent / "data" / "hotspots.csv"
+    if hotspots_path.exists() and "HGVSp_Short" in df.columns:
+        import re
+        hotspots_df = pd.read_csv(hotspots_path)
+        hotspot_locs = set(zip(hotspots_df["Hugo_Symbol"], hotspots_df["Amino_Acid_Position"].astype(str)))
+        
+        def check_curated_hotspot(row):
+            hgvsp = str(row.get("HGVSp_Short", ""))
+            gene = str(row.get(gene_col, ""))
+            if not str(hgvsp).startswith("p."): return 0.0
+            match = re.search(r"p\.[A-Za-z]+(\d+)", str(hgvsp))
+            if match:
+                pos = match.group(1)
+                return float((gene, pos) in hotspot_locs)
+            return 0.0
+            
+        df["is_hotspot"] = df.apply(check_curated_hotspot, axis=1)
 
     # Population frequency proxy (ExAC/gnomAD — use 0 if not available as germline filter)
     if "ExAC_AF" in df.columns:
@@ -119,44 +170,127 @@ def build_feature_matrix(maf_df):
     else:
         df["pop_af"] = 0.0
 
+    # New features: SIFT, PolyPhen, callers, COSMIC
+    if "SIFT" in df.columns:
+        df["sift_score"] = df["SIFT"].str.extract(r'\(([\d\.]+)\)').astype(float).fillna(-1.0)
+    else: df["sift_score"] = -1.0
+        
+    if "PolyPhen" in df.columns:
+        df["polyphen_score"] = df["PolyPhen"].str.extract(r'\(([\d\.]+)\)').astype(float).fillna(-1.0)
+    else: df["polyphen_score"] = -1.0
+        
+    if "callers" in df.columns:
+        df["caller_count"] = df["callers"].fillna("").apply(lambda x: len(x.split(";")) if x else 0)
+    else: df["caller_count"] = 1
+        
+    if "COSMIC" in df.columns:
+        df["in_cosmic"] = df["COSMIC"].notna().astype(float)
+    else: df["in_cosmic"] = 0.0
+
     features = [
-        "vaf", "depth", "consequence_score", "driver_tier",
-        "clonality_score", "is_snv", "is_hotspot", "pop_af",
+        "vaf", "depth", "driver_tier", "consequence_score",
+        "clonality_score", "is_snv", "pop_af",
+        "sift_score", "polyphen_score", "caller_count", "in_cosmic"
     ]
     return df, features, gene_col
 
-def train_rf_xgb(X, y_labels, feature_names):
+def train_rf_xgb(X, y_labels, feature_names, groups):
     """Train Random Forest and XGBoost on binary labels (driver=1, passenger=0)."""
     from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-    from sklearn.model_selection import StratifiedKFold, cross_val_score
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.metrics import roc_auc_score
+    from sklearn.model_selection import GroupKFold
+    from sklearn.metrics import roc_auc_score, average_precision_score
     import numpy as np
+    from scipy import stats
 
     # Replace NaN
-    X = np.nan_to_num(X, nan=0.0, posinf=1.0, neginf=0.0)
+    X = np.nan_to_num(X, nan=-1.0, posinf=1.0, neginf=-1.0)
 
     print(f"Training on {X.shape[0]} variants, {X.shape[1]} features")
-    print(f"  Driver variants (y=1): {y_labels.sum()} / {len(y_labels)}")
+    print(f"  Hotspot variants (y=1): {y_labels.sum()} / {len(y_labels)}")
 
-    rf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=42, n_jobs=-1)
+    rf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=42, n_jobs=6)
     xgb = GradientBoostingClassifier(n_estimators=200, max_depth=4, learning_rate=0.05, random_state=42)
-
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
     if y_labels.sum() < 5:
         print("  Warning: too few positive labels for CV — using full dataset")
         rf.fit(X, y_labels)
         xgb.fit(X, y_labels)
-        rf_auc = 0.0
-        xgb_auc = 0.0
+        rf_auc, xgb_auc, rf_pr, xgb_pr = 0.0, 0.0, 0.0, 0.0
     else:
-        rf_scores  = cross_val_score(rf,  X, y_labels, cv=cv, scoring="roc_auc")
-        xgb_scores = cross_val_score(xgb, X, y_labels, cv=cv, scoring="roc_auc")
-        rf_auc  = rf_scores.mean()
-        xgb_auc = xgb_scores.mean()
-        print(f"  RF  CV AUC: {rf_auc:.3f} ± {rf_scores.std():.3f}")
-        print(f"  XGB CV AUC: {xgb_auc:.3f} ± {xgb_scores.std():.3f}")
+        from sklearn.model_selection import KFold
+        
+        pooled_pr_aucs = []
+        unique_groups = np.unique(groups)
+        
+        train_rf_xgb.fold_stats = []
+        
+        for repeat_seed in range(10):
+            print(f"    Running repeat {repeat_seed + 1}/10...")
+            # Shuffle unique genes
+            rng = np.random.RandomState(repeat_seed)
+            shuffled_genes = rng.permutation(unique_groups)
+            
+            # Split into 5 folds
+            folds = np.array_split(shuffled_genes, 5)
+            
+            oof_rf_pred = np.zeros(len(y_labels))
+            
+            repeat_genes = []
+            
+            for fold_idx, test_genes in enumerate(folds):
+                test_mask = np.isin(groups, test_genes)
+                train_mask = ~test_mask
+                
+                rf.fit(X[train_mask], y_labels[train_mask])
+                oof_rf_pred[test_mask] = rf.predict_proba(X[test_mask])[:, 1]
+                
+                # Record stats for fold
+                test_y = y_labels[test_mask]
+                if test_y.sum() > 0:
+                    df_fold = pd.DataFrame({'gene': groups[test_mask], 'y': test_y})
+                    top_genes = df_fold[df_fold['y'] == 1].groupby('gene').size().sort_values(ascending=False).head(3)
+                    repeat_genes.extend([f"{k}({v})" for k, v in top_genes.items()])
+                    
+            # Compute pooled PR-AUC
+            pooled_pr = average_precision_score(y_labels, oof_rf_pred)
+            pooled_auc_val = roc_auc_score(y_labels, oof_rf_pred)
+            pooled_pr_aucs.append(pooled_pr)
+            if not hasattr(train_rf_xgb, "aucs"): train_rf_xgb.aucs = []
+            train_rf_xgb.aucs.append(pooled_auc_val)
+            
+            train_rf_xgb.fold_stats.append({
+                "repeat": repeat_seed,
+                "pooled_pr_auc": float(pooled_pr),
+                "dominant_genes_in_folds": ", ".join(repeat_genes[:10])
+            })
+            
+        rf_pr_mean = np.mean(pooled_pr_aucs)
+        rf_pr_min = np.min(pooled_pr_aucs)
+        rf_pr_max = np.max(pooled_pr_aucs)
+        rf_pr_std = np.std(pooled_pr_aucs, ddof=1)
+        
+        def ci(scores):
+            m, se = np.mean(scores), stats.sem(scores)
+            h = se * stats.t.ppf((1 + 0.95) / 2., len(scores)-1)
+            return m, h
+
+        _, rf_pr_h = ci(pooled_pr_aucs)
+        
+        train_rf_xgb.metrics = {
+            "pooled_pr_auc_mean": float(rf_pr_mean),
+            "pooled_pr_auc_ci": float(rf_pr_h),
+            "min": float(rf_pr_min),
+            "max": float(rf_pr_max),
+            "repeats": 10,
+            "pooled_auc": float(np.mean(train_rf_xgb.aucs))
+        }
+        
+        print(f"  RF Pooled PR-AUC (10 repeats): Mean {rf_pr_mean:.3f} ± {rf_pr_h:.3f} (95% CI) | Min {rf_pr_min:.3f} | Max {rf_pr_max:.3f}")
+        
+        rf_auc = train_rf_xgb.metrics["pooled_auc"]
+        xgb_auc = 0.0 # Bypassed to focus on PR-AUC
+
+        
         rf.fit(X, y_labels)
         xgb.fit(X, y_labels)
 
@@ -184,15 +318,24 @@ def main():
 
     print(f"MAF: {len(maf)} rows, {maf['Tumor_Sample_Barcode'].nunique() if 'Tumor_Sample_Barcode' in maf.columns else '?'} patients")
 
+    # Gap 4: Explicit gnomAD filter
+    if "gnomAD_AF" in maf.columns:
+        af = pd.to_numeric(maf["gnomAD_AF"], errors="coerce").fillna(0.0)
+        pre_len = len(maf)
+        maf = maf[af <= GNOMAD_MAX_AF_THRESH].copy()
+        removed = pre_len - len(maf)
+        print(f"Filtered {removed} variants with gnomAD_AF > {GNOMAD_MAX_AF_THRESH}")
+
     # Build feature matrix
     df, features, gene_col = build_feature_matrix(maf)
 
-    # Labels: tier-1 driver gene missense/nonsense = positive class
-    y = ((df["driver_tier"] >= 1) & (df["consequence_score"] >= 7)).astype(int).values
+    # Labels: CancerHotspots = positive class
+    y = df["is_hotspot"].astype(int).values
     X = df[features].values
+    groups = df[gene_col].values
 
     # Train models
-    rf, xgb_model, rf_auc, xgb_auc, fi_rf, fi_xgb = train_rf_xgb(X, y, features)
+    rf, xgb_model, rf_auc, xgb_auc, fi_rf, fi_xgb = train_rf_xgb(X, y, features, groups)
 
     # Score all variants
     rf_prob  = rf.predict_proba(np.nan_to_num(X, nan=0.0))[:, 1]
@@ -247,7 +390,46 @@ def main():
     print(f"\nModel report: {OUT_MODEL}")
     print(f"RF AUC: {rf_auc:.3f}  XGB AUC: {xgb_auc:.3f}")
     print(f"Actionable variants: {report['actionable_variants_found']}")
+    
+    from sklearn.metrics import precision_score, recall_score, confusion_matrix
+    
+    mask = df["is_hotspot_regex"].notna() & df["is_hotspot"].notna()
+    y_true = df.loc[mask, "is_hotspot"].values
+    y_pred = df.loc[mask, "is_hotspot_regex"].values
+    
+    prec = precision_score(y_true, y_pred, zero_division=0)
+    rec = recall_score(y_true, y_pred, zero_division=0)
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    
+    print("\nHotspot Annotation Comparison:")
+    print(f"  CancerHotspots Count: {int(y_true.sum())}")
+    print(f"  Regex Hotspots Count: {int(y_pred.sum())}")
+    print(f"  Regex Precision against CancerHotspots: {prec:.2%}")
+    print(f"  Regex Recall against CancerHotspots: {rec:.2%}")
+    print(f"  FP={fp}, FN={fn}")
+    
     print("=== DONE ===")
+    
+    final_metrics_path = WORK / "final_metrics.json"
+    
+    metrics = getattr(train_rf_xgb, "metrics", {})
+    output_data = {
+        "pooled_pr_auc_mean": metrics.get("pooled_pr_auc_mean", 0.0),
+        "95_ci_half_width": metrics.get("pooled_pr_auc_ci", 0.0),
+        "min": metrics.get("min", 0.0),
+        "max": metrics.get("max", 0.0),
+        "repeats": metrics.get("repeats", 10),
+        "positives": int(y_true.sum()),
+        "total": len(df),
+        "baseline_pr_auc": float(y_true.sum() / len(df)),
+        "pooled_auc": metrics.get("pooled_auc", 0.0),
+        "model_report": "results/ml_model_report.json"
+    }
+    
+    with open(final_metrics_path, "w") as f:
+        json.dump(output_data, f, indent=4)
+        
+    print(f"Final metrics saved to {final_metrics_path}")
 
 if __name__ == "__main__":
     # Install sklearn if needed

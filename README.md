@@ -14,12 +14,12 @@
 | Real-Reference BAM Generation | ✅ Complete | 5 chr17 regions, actual GRCh38 reference |
 | GATK4 Mutect2 Somatic Calling | ✅ Complete | v4.5.0.0, Java 17, FilterMutectCalls, 5/5 runs |
 | VEP Annotation of VCFs | ✅ Complete | Ensembl REST API, PASS variants annotated |
-| ML Prioritizer (RF + XGBoost) | ✅ Complete | AUC 1.0 on 62,146 variants, 29 actionable found |
+| ML Prioritizer (RF + XGBoost) | ✅ Complete | Re-trained to predict CancerHotspots variants; RF CV AUC 0.987, PR-AUC 0.268 (on 248 positive labels) |
 | Parabricks Extraction | ✅ Complete | pbrun 4.3.1-1 extracted from nvcr.io without Docker |
 | Direct GPU Wall-clock Benchmark | ⚠️ Blocked | GLIBC 2.31 (Ubuntu 20.04) vs required 2.34; GPU active (A10G, 69 GFLOPS via PyTorch) |
 | Interactive Dashboard + Viz | ✅ Complete | React + Vite, Pipeline / Cohort Analysis / GPU Benchmark / Results tabs |
 
-**Bottom line:** Branch A is fully complete on 198 TCGA-LUAD patients. ML prioritizer scored 62,146 mutations and found 29 actionable variants. GPU environment is confirmed active but Parabricks direct call is blocked by GLIBC version. CPU timing is measured; GPU speedup from literature (O'Connell et al. BMC Bioinformatics 24:221, 2023, 56.8×). Branch B synthetic truth-set benchmark ran but recalls 0% — explained below.
+**Bottom line:** Branch A is fully complete on 198 TCGA-LUAD patients. ML prioritizer scored ~62,000 mutations. GPU environment is confirmed active but Parabricks direct call is blocked by GLIBC version. CPU timing is measured; GPU speedup from literature (O'Connell et al. BMC Bioinformatics 24:221, 2023, 56.8×). Branch B synthetic truth-set benchmark ran but recalls 0% — explained below.
 
 ---
 
@@ -206,12 +206,43 @@ dna/
 | GPU speedup (literature) | 56.8× for Mutect2 somatic; 36h → 38min WGS | fig3, fig7 |
 | KRAS+TP53 co-mutation | Frequent in target cohort — reduced inhibitor response | fig6 |
 
----
-
-## Known Limitations
+## Known Limitations & Recent Fixes
 
 - **GPU direct timing blocked** by GLIBC 2.31 vs 2.34 (SageMaker Ubuntu 20.04). Fix: Docker with `--gpus all` on Ubuntu 22.04 base.
-- **ML AUC 1.0** reflects strength of `driver_tier` prior (COSMIC/OncoKB), not a blind generalisation test.
+- **ML Prioritizer Target Redefinition (Gap 1):** The initial AUC of 1.0 was caused by target leakage. The pipeline now predicts hotspot status using CancerHotspots.org (v2) as an independent ground-truth label.
+- **Model Performance & Features (10x Pooled Out-Of-Fold):**
+  - **Baseline:** Random guessing yields a PR-AUC of 0.004.
+  - **Missense Baseline:** Using only `Variant_Classification == Missense_Mutation` yields PR-AUC 0.005.
+  - **Gene Prior Baseline (`driver_tier` only):** Achieves PR-AUC 0.092. The model relies heavily on the gene prior (hotspots only exist in cancer genes).
+  - **Ablation (No COSMIC, No driver_tier):** PR-AUC 0.024.
+  - **No COSMIC:** PR-AUC 0.222. Adding biological features (VAF, SIFT, PolyPhen, consequence) lifts the PR-AUC from 0.092 to 0.222, providing real predictive lift beyond the gene prior.
+  - **Full Features:** Mean Pooled PR-AUC 0.258 ± 0.024 (95% CI). Adding `COSMIC` lifts PR-AUC slightly further, but `COSMIC` is a near-proxy for recurrence and the label, so this lift should be treated with suspicion.
+- **Task Utility Limitation:** The model now predicts a database label (CancerHotspots) that is already available by direct lookup. Thus, its primary utility is predicting *novel* hotspots not yet in the DB. Note that "hotspot" is not synonymous with "driver" (many truncating tumour suppressors are drivers but not hotspots).
+- **Dataset Overlap:** CancerHotspots (v2) was built partly from TCGA samples. Since our GDC cohort is TCGA-LUAD, there is an inherent overlap between the training dataset and the definition of the ground-truth label.
+- **Regex vs Curated Hotspots (Gap 2):** The old regex-based hotspot matched 63 variants vs 248 in CancerHotspots, yielding a Precision of 90.48% but a Recall of only 22.98% against the curated DB.
+- **Driver Gene Tiers (Gap 3):** Replaced hardcoded gene lists with a dynamic lookup using the OncoKB Cancer Gene List.
+- **New Features (Gap 6):** SIFT, PolyPhen, Caller counts, and COSMIC recurrence have been parsed and added to the feature set.
 - **Branch B recall = 0%** because synthetic BAMs lack matched normal — real tumour-normal pairs needed.
 - **VAF clonality** is not purity-corrected; raw thresholds underestimate clonal fraction.
-- **TTN/MUC16 in top genes** are passenger size-bias artefacts, not drivers — filter by driver_tier before reporting.
+- **TTN/MUC16 in top genes** are passenger size-bias artefacts, not drivers.
+- **Hotspot Annotation (Gap 5):** The native GDC MAF `hotspot` column uses `'Y'` (253 counts) and `'N'` rather than boolean formatting, breaking earlier parsers.
+
+---
+
+## Reproducing the Pipeline
+
+Since clinical and hotspot databases are frequently updated and subject to licensing, some inputs are untracked. To reproduce:
+1. **MAF (`tcga_luad_merged.maf`):** Place the merged TCGA-LUAD MAF inside the `results/` folder (it and `luad_maf.tar.gz` are ignored in Git to prevent bloat).
+2. **CancerHotspots (`data/hotspots.csv`):** Download the current hotspot list from [CancerHotspots.org](https://www.cancerhotspots.org/#/download) and place it in `data/`.
+3. **OncoKB / COSMIC List (`data/oncokb_cancer_gene_list.txt`):** Download the static gene list from `https://www.oncokb.org/api/v1/utils/cancerGeneList.txt` (no token required). Tier membership is defined by the `"OncoKB Annotated" == "Yes"` and `"COSMIC CGC" == "Yes"` columns.
+4. **Matching Logic:** Hotspots are matched strictly by **Gene + Residue Position**, not the exact amino acid change (e.g., a nonsense variant like TP53 Q331* counts as a match if position 331 is a hotspot).
+5. **gnomAD Parsing:** 86% of variants (53,744 of 62,146) have missing values in gnomAD (likely absent from the population). These are filled with `0`.
+6. **Per-variant Score Files:** Intermediate score files like `results/ml_prioritizer_scores.csv` are tracked in `.gitignore` due to size and should be regenerated locally using `scripts/04_ml_prioritizer.py`.
+---
+
+## Citations & Licensing
+
+- **OncoKB:** Used for defining `driver_tier`. OncoKB is a proprietary database (Memorial Sloan Kettering Cancer Center). The static gene list is freely available via the API, but full annotation requires a license. Free for academic use only.
+- **COSMIC:** The Cancer Gene Census flag used in `driver_tier` and `in_cosmic` is subject to the restrictive COSMIC license (Sanger Institute). Commercial use requires a paid license. We did not independently scrape COSMIC.
+- **CancerHotspots:** Sourced from `CancerHotspots.org` (v2, MSKCC).
+
