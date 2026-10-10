@@ -253,7 +253,10 @@ def train_rf_xgb(X, y_labels, feature_names, groups):
                     
             # Compute pooled PR-AUC
             pooled_pr = average_precision_score(y_labels, oof_rf_pred)
+            pooled_auc_val = roc_auc_score(y_labels, oof_rf_pred)
             pooled_pr_aucs.append(pooled_pr)
+            if not hasattr(train_rf_xgb, "aucs"): train_rf_xgb.aucs = []
+            train_rf_xgb.aucs.append(pooled_auc_val)
             
             train_rf_xgb.fold_stats.append({
                 "repeat": repeat_seed,
@@ -274,16 +277,18 @@ def train_rf_xgb(X, y_labels, feature_names, groups):
         _, rf_pr_h = ci(pooled_pr_aucs)
         
         train_rf_xgb.metrics = {
-            "rf_pr_mean": float(rf_pr_mean),
-            "rf_pr_std_sample": float(rf_pr_std),
-            "rf_pr_95_ci_half_width": float(rf_pr_h),
-            "rf_pr_min": float(rf_pr_min),
-            "rf_pr_max": float(rf_pr_max)
+            "pooled_pr_auc_mean": float(rf_pr_mean),
+            "pooled_pr_auc_ci": float(rf_pr_h),
+            "min": float(rf_pr_min),
+            "max": float(rf_pr_max),
+            "repeats": 10,
+            "pooled_auc": float(np.mean(train_rf_xgb.aucs))
         }
         
         print(f"  RF Pooled PR-AUC (10 repeats): Mean {rf_pr_mean:.3f} ± {rf_pr_h:.3f} (95% CI) | Min {rf_pr_min:.3f} | Max {rf_pr_max:.3f}")
         
-        rf_auc, xgb_auc = 0.0, 0.0 # Bypassed to focus on PR-AUC
+        rf_auc = train_rf_xgb.metrics["pooled_auc"]
+        xgb_auc = 0.0 # Bypassed to focus on PR-AUC
 
         
         rf.fit(X, y_labels)
@@ -406,14 +411,23 @@ def main():
     print("=== DONE ===")
     
     final_metrics_path = WORK / "final_metrics.json"
+    
+    metrics = getattr(train_rf_xgb, "metrics", {})
+    output_data = {
+        "pooled_pr_auc_mean": metrics.get("pooled_pr_auc_mean", 0.0),
+        "95_ci_half_width": metrics.get("pooled_pr_auc_ci", 0.0),
+        "min": metrics.get("min", 0.0),
+        "max": metrics.get("max", 0.0),
+        "repeats": metrics.get("repeats", 10),
+        "positives": int(y_true.sum()),
+        "total": len(df),
+        "baseline_pr_auc": float(y_true.sum() / len(df)),
+        "pooled_auc": metrics.get("pooled_auc", 0.0),
+        "model_report": "results/ml_model_report.json"
+    }
+    
     with open(final_metrics_path, "w") as f:
-        json.dump({
-            "model_name": "Hotspot Prioritizer (CancerHotspots) - 10 Repeats Pooled",
-            "rf_pooled_pr_auc": getattr(train_rf_xgb, "metrics", {}),
-            "positive_labels": int(y_true.sum()),
-            "total_variants": len(df),
-            "repeat_stats": getattr(train_rf_xgb, "fold_stats", [])
-        }, f, indent=4)
+        json.dump(output_data, f, indent=4)
         
     print(f"Final metrics saved to {final_metrics_path}")
 
