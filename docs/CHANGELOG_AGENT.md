@@ -2,8 +2,12 @@
 
 ## 1. Gap 1: ML Target Leakage (AUC = 1.0)
 - **Fix:** Redefined the ML task entirely to prevent leakage. The model now predicts whether a variant is a true hotspot (label `y` = `is_hotspot` from CancerHotspots.org) using biological features. `driver_tier` and `consequence_score` are now used strictly as features, not labels. `GroupKFold` grouped by gene is maintained.
-- **Before:** AUC 1.0
-- **After:** RF CV AUC 0.987 ± 0.011, PR-AUC 0.268 ± 0.252. The task is highly imbalanced (248 positive examples out of 62k).
+- **Ablation & Metrics:** 
+  - **Full Features:** RF CV AUC 0.987, PR-AUC 0.268. The task is highly imbalanced (248 positive examples out of 62k; Baseline PR: 0.0040).
+  - **Without COSMIC:** CV AUC 0.990, PR-AUC 0.222 (Confirms performance isn't just relying on COSMIC as a leak).
+  - **Without COSMIC & driver_tier:** CV AUC 0.806, PR-AUC 0.024 (Model fails without gene-level priors).
+  - **PR-AUC Variance (±0.252):** Explained by `GroupKFold` grouping by gene. Fold 2 has 108 positives (dominated by TP53 with 79), Fold 4 has 88 positives (dominated by KRAS with 60), while Folds 0 and 3 have <10 positives.
+- **Limitation:** The task predicts a database label (CancerHotspots) that is available by lookup. "Hotspot" is not the same as "driver," and CancerHotspots overlaps with TCGA (where this GDC MAF likely originates).
 
 ## 2. Gap 2: Regex is_hotspot
 - **Fix:** Used the curated CancerHotspots DB (v2) for variant matching instead of regex.
@@ -15,6 +19,7 @@
 
 ## 3. Gap 3: Hardcoded driver_tier
 - **Fix:** Replaced hardcoded driver tiers with the official OncoKB Cancer Gene List, downloaded via their public API (no token required). Kept tier distinction: variants receive Tier 2 if the gene is in both OncoKB and COSMIC CGC, Tier 1 if only one of them, and Tier 0 otherwise.
+- **Licensing/Attribution:** OncoKB is free for academic use (requires a license for commercial). The COSMIC CGC status was extracted purely from the OncoKB file, meaning we did not bypass COSMIC's strict registration wall to download CGC independently.
 
 ## 4. Gap 4: Explicit gnomAD filter
 - **Fix:** Filtered variants with `gnomAD_AF > 0.001`.
@@ -31,4 +36,4 @@
 - **Decision:** Documented that ClinVar was excluded from features due to extreme sparsity (0.9% coverage). It is not useful for training the main ML prioritizer.
 
 ## 8. Gap 8: Reproducibility
-- **Fix:** Pinned all Python dependencies to `requirements.txt` using `pip freeze`, and set fixed `random_state=42` across ML models for determinism.
+- **Fix:** Pinned only direct Python dependencies to `requirements.txt` (`pandas`, `numpy`, `scikit-learn`, `xgboost`, `scipy`), omitting shared-environment bloat. Set fixed `random_state=42` across ML models for determinism. Conducted a clean-clone re-run to verify metrics.
