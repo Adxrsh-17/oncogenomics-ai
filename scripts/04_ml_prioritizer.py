@@ -17,6 +17,8 @@ REPORT    = WORK / "patient_clinical_report.csv"
 OUT_SCORES = WORK / "ml_prioritizer_scores.csv"
 OUT_MODEL  = WORK / "ml_model_report.json"
 
+GNOMAD_MAX_AF_THRESH = 0.001
+
 # ---------- known cancer driver genes for scoring ----------
 TIER1_DRIVERS = {
     "KRAS", "EGFR", "TP53", "STK11", "KEAP1", "RB1", "CDKN2A",
@@ -213,6 +215,14 @@ def main():
             sys.exit(1)
 
     print(f"MAF: {len(maf)} rows, {maf['Tumor_Sample_Barcode'].nunique() if 'Tumor_Sample_Barcode' in maf.columns else '?'} patients")
+
+    # Gap 4: Explicit gnomAD filter
+    if "gnomAD_AF" in maf.columns:
+        af = pd.to_numeric(maf["gnomAD_AF"], errors="coerce").fillna(0.0)
+        pre_len = len(maf)
+        maf = maf[af <= GNOMAD_MAX_AF_THRESH].copy()
+        removed = pre_len - len(maf)
+        print(f"Filtered {removed} variants with gnomAD_AF > {GNOMAD_MAX_AF_THRESH}")
 
     # Build feature matrix
     df, features, gene_col = build_feature_matrix(maf)
