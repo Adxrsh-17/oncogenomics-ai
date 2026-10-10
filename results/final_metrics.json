@@ -1,0 +1,55 @@
+{
+    "model_name": "Hotspot Prioritizer (CancerHotspots)",
+    "rf_cv_auc": {
+        "mean": 0.9867470866176362,
+        "std": 0.010995946297510556
+    },
+    "rf_cv_pr_auc": {
+        "mean": 0.2677331836749443,
+        "std": 0.25163456232503767
+    },
+    "positive_labels": 248,
+    "total_variants": 62143,
+    "fold_stats": [
+        {
+            "fold": 0,
+            "genes_in_test": 2843,
+            "positives": 4,
+            "dominant_genes": "MAP2K1(2), NOTCH1(1), RIT1(1)",
+            "rf_auc": 0.9752515090543259,
+            "rf_pr": 0.046157687541007505
+        },
+        {
+            "fold": 1,
+            "genes_in_test": 2845,
+            "positives": 40,
+            "dominant_genes": "EGFR(21), KEAP1(7), RARA(2), ARAF(2), ERBB2(2)",
+            "rf_auc": 0.9794717087739124,
+            "rf_pr": 0.19816741271393776
+        },
+        {
+            "fold": 2,
+            "genes_in_test": 2845,
+            "positives": 113,
+            "dominant_genes": "TP53(79), STK11(10), NFE2L2(8), CTNNB1(3), RAF1(2)",
+            "rf_auc": 0.9921858608271275,
+            "rf_pr": 0.5153471518306232
+        },
+        {
+            "fold": 3,
+            "genes_in_test": 2844,
+            "positives": 13,
+            "dominant_genes": "CDKN2A(3), FBXW7(2), SOS1(2), RAD50(2), MAX(1)",
+            "rf_auc": 0.9911583382384832,
+            "rf_pr": 0.13443583448256047
+        },
+        {
+            "fold": 4,
+            "genes_in_test": 2845,
+            "positives": 78,
+            "dominant_genes": "KRAS(60), PIK3CA(11), GNAS(3), SMAD4(2), IRF4(1)",
+            "rf_auc": 0.9956680161943321,
+            "rf_pr": 0.44455783180659264
+        }
+    ]
+}

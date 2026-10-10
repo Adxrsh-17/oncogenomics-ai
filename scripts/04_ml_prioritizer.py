@@ -6,10 +6,14 @@ Features: VAF, depth, functional consequence, pathway relevance,
 Input:  results/patient_clinical_report.csv + results/pathway_analysis.csv + MAF
 Output: results/ml_prioritizer_scores.csv + model performance report
 """
-import json, sys, subprocess
+import json, sys, subprocess, os
 from pathlib import Path
 import numpy as np
 import pandas as pd
+
+os.environ['OMP_NUM_THREADS'] = '6'
+os.environ['MKL_NUM_THREADS'] = '6'
+os.environ['OPENBLAS_NUM_THREADS'] = '6'
 
 WORK      = Path(__file__).resolve().parent.parent / "results"
 MAF_FILE  = WORK / "tcga_luad_merged.maf"
@@ -230,6 +234,28 @@ def train_rf_xgb(X, y_labels, feature_names, groups):
             rf_prs.append(average_precision_score(y_labels[test_idx], rf_pred))
             xgb_prs.append(average_precision_score(y_labels[test_idx], xgb_pred))
             
+            # Record per-fold stats
+            test_y = y_labels[test_idx]
+            test_groups = groups[test_idx]
+            fold_genes_count = len(set(test_groups))
+            pos_count = test_y.sum()
+            
+            df_fold = pd.DataFrame({'gene': test_groups, 'y': test_y})
+            top_genes = df_fold[df_fold['y'] == 1].groupby('gene').size().sort_values(ascending=False).head(5)
+            top_genes_str = ", ".join([f"{k}({v})" for k, v in top_genes.items()])
+            
+            if not hasattr(train_rf_xgb, "fold_stats"):
+                train_rf_xgb.fold_stats = []
+            
+            train_rf_xgb.fold_stats.append({
+                "fold": len(train_rf_xgb.fold_stats),
+                "genes_in_test": fold_genes_count,
+                "positives": int(pos_count),
+                "dominant_genes": top_genes_str,
+                "rf_auc": float(rf_aucs[-1]),
+                "rf_pr": float(rf_prs[-1])
+            })
+            
         rf_auc = np.mean(rf_aucs)
         xgb_auc = np.mean(xgb_aucs)
         rf_pr = np.mean(rf_prs)
@@ -245,6 +271,11 @@ def train_rf_xgb(X, y_labels, feature_names, groups):
         xgb_auc_m, xgb_auc_h = ci(xgb_aucs)
         rf_pr_m, rf_pr_h = ci(rf_prs)
         xgb_pr_m, xgb_pr_h = ci(xgb_prs)
+        
+        train_rf_xgb.metrics = {
+            "rf_auc_mean": float(rf_auc_m), "rf_auc_std": float(rf_auc_h),
+            "rf_pr_mean": float(rf_pr_m), "rf_pr_std": float(rf_pr_h)
+        }
         
         print(f"  RF  CV AUC: {rf_auc_m:.3f} ± {rf_auc_h:.3f}, PR-AUC: {rf_pr_m:.3f} ± {rf_pr_h:.3f}")
         print(f"  XGB CV AUC: {xgb_auc_m:.3f} ± {xgb_auc_h:.3f}, PR-AUC: {xgb_pr_m:.3f} ± {xgb_pr_h:.3f}")
@@ -367,6 +398,19 @@ def main():
     print(f"  FP={fp}, FN={fn}")
     
     print("=== DONE ===")
+    
+    final_metrics_path = WORK / "final_metrics.json"
+    with open(final_metrics_path, "w") as f:
+        json.dump({
+            "model_name": "Hotspot Prioritizer (CancerHotspots)",
+            "rf_cv_auc": {"mean": getattr(train_rf_xgb, "metrics", {}).get("rf_auc_mean", 0), "std": getattr(train_rf_xgb, "metrics", {}).get("rf_auc_std", 0)},
+            "rf_cv_pr_auc": {"mean": getattr(train_rf_xgb, "metrics", {}).get("rf_pr_mean", 0), "std": getattr(train_rf_xgb, "metrics", {}).get("rf_pr_std", 0)},
+            "positive_labels": int(y_true.sum()),
+            "total_variants": len(df),
+            "fold_stats": getattr(train_rf_xgb, "fold_stats", [])
+        }, f, indent=4)
+        
+    print(f"Final metrics saved to {final_metrics_path}")
 
 if __name__ == "__main__":
     # Install sklearn if needed
