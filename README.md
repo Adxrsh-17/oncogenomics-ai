@@ -208,10 +208,12 @@ dna/
 
 ---
 
-## Known Limitations
+## Known Limitations & Recent Fixes
 
 - **GPU direct timing blocked** by GLIBC 2.31 vs 2.34 (SageMaker Ubuntu 20.04). Fix: Docker with `--gpus all` on Ubuntu 22.04 base.
-- **ML AUC 1.0** reflects strength of `driver_tier` prior (COSMIC/OncoKB), not a blind generalisation test.
+- **ML Prioritizer AUC:** Previously suffered from label leakage (AUC 1.0) due to including `driver_tier` and `consequence_score` as predictive features. This has been resolved using GroupKFold cross-validation by gene and relying on independent OncoKB annotations for the driver labels (yielding a more realistic CV AUC of ~0.55).
 - **Branch B recall = 0%** because synthetic BAMs lack matched normal — real tumour-normal pairs needed.
 - **VAF clonality** is not purity-corrected; raw thresholds underestimate clonal fraction.
 - **TTN/MUC16 in top genes** are passenger size-bias artefacts, not drivers — filter by driver_tier before reporting.
+- **Hotspot Annotation (Gap 5):** The GDC MAF `hotspot` column uses `'Y'` and `'N'` rather than `TRUE`/`FALSE` or `True`/`False`, which broke early parsing scripts. The pipeline now uses the curated CancerHotspots DB.
+- **Unused Annotations (Gap 6):** VEP annotations such as SIFT and PolyPhen are successfully parsed and present for ~64% of the variants, but are not yet incorporated into the ML prioritizer feature set.
