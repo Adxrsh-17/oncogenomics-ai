@@ -13,6 +13,8 @@ MAF_FULL = Path("/opt/ml/input/data/notebook/oncoseq/mafs/tcga_luad_full_merged.
 OUT_DIR  = Path("/opt/ml/input/data/notebook/oncoseq/results")
 OUT_DIR.mkdir(exist_ok=True)
 
+GNOMAD_MAX_AF_THRESH = 0.001
+
 PATHWAY_GENES = {
     "RAS/MAPK": ["KRAS","NRAS","HRAS","BRAF","RAF1","MAP2K1","MAP2K2","NF1"],
     "RTK/Growth": ["EGFR","ERBB2","ERBB3","MET","FGFR1","FGFR2","FGFR3","RET","ALK","ROS1"],
@@ -84,6 +86,14 @@ def main():
     print(f"Loading MAF: {MAF_FULL}")
     maf = pd.read_csv(MAF_FULL, sep="\t", comment="#", low_memory=False)
     print(f"  {len(maf)} mutations, {maf['Tumor_Sample_Barcode'].nunique()} patients")
+
+    # Gap 4: Explicit gnomAD filter
+    if "gnomAD_AF" in maf.columns:
+        af = pd.to_numeric(maf["gnomAD_AF"], errors="coerce").fillna(0.0)
+        pre_len = len(maf)
+        maf = maf[af <= GNOMAD_MAX_AF_THRESH].copy()
+        removed = pre_len - len(maf)
+        print(f"  Filtered {removed} variants with gnomAD_AF > {GNOMAD_MAX_AF_THRESH}")
 
     all_pts = set(maf["Tumor_Sample_Barcode"].dropna().unique())
     N = len(all_pts)
