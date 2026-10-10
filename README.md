@@ -14,12 +14,12 @@
 | Real-Reference BAM Generation | ✅ Complete | 5 chr17 regions, actual GRCh38 reference |
 | GATK4 Mutect2 Somatic Calling | ✅ Complete | v4.5.0.0, Java 17, FilterMutectCalls, 5/5 runs |
 | VEP Annotation of VCFs | ✅ Complete | Ensembl REST API, PASS variants annotated |
-| ML Prioritizer (RF + XGBoost) | ✅ Complete | AUC 1.0 on 62,146 variants, 29 actionable found |
+| ML Prioritizer (RF + XGBoost) | ✅ Complete | Re-trained to predict CancerHotspots variants; RF CV AUC 0.987, PR-AUC 0.268 (on 248 positive labels) |
 | Parabricks Extraction | ✅ Complete | pbrun 4.3.1-1 extracted from nvcr.io without Docker |
 | Direct GPU Wall-clock Benchmark | ⚠️ Blocked | GLIBC 2.31 (Ubuntu 20.04) vs required 2.34; GPU active (A10G, 69 GFLOPS via PyTorch) |
 | Interactive Dashboard + Viz | ✅ Complete | React + Vite, Pipeline / Cohort Analysis / GPU Benchmark / Results tabs |
 
-**Bottom line:** Branch A is fully complete on 198 TCGA-LUAD patients. ML prioritizer scored 62,146 mutations and found 29 actionable variants. GPU environment is confirmed active but Parabricks direct call is blocked by GLIBC version. CPU timing is measured; GPU speedup from literature (O'Connell et al. BMC Bioinformatics 24:221, 2023, 56.8×). Branch B synthetic truth-set benchmark ran but recalls 0% — explained below.
+**Bottom line:** Branch A is fully complete on 198 TCGA-LUAD patients. ML prioritizer scored ~62,000 mutations. GPU environment is confirmed active but Parabricks direct call is blocked by GLIBC version. CPU timing is measured; GPU speedup from literature (O'Connell et al. BMC Bioinformatics 24:221, 2023, 56.8×). Branch B synthetic truth-set benchmark ran but recalls 0% — explained below.
 
 ---
 
@@ -211,9 +211,11 @@ dna/
 ## Known Limitations & Recent Fixes
 
 - **GPU direct timing blocked** by GLIBC 2.31 vs 2.34 (SageMaker Ubuntu 20.04). Fix: Docker with `--gpus all` on Ubuntu 22.04 base.
-- **ML Prioritizer AUC:** Previously suffered from label leakage (AUC 1.0) due to including `driver_tier` and `consequence_score` as predictive features. This has been resolved using GroupKFold cross-validation by gene and relying on independent OncoKB annotations for the driver labels (yielding a more realistic CV AUC of ~0.55).
+- **ML Prioritizer Target Redefinition (Gap 1):** The initial AUC of 1.0 was caused by target leakage (label was defined from features). The pipeline has been overhauled to use CancerHotspots.org (v2) as the independent ground-truth label, redefining the task to predicting hotspot status. This yields an honest RF CV AUC of 0.987 and a PR-AUC of 0.268 (highly imbalanced: 248 positive examples out of 62k).
+- **Driver Gene Tiers (Gap 3):** Replaced hardcoded gene lists with a dynamic lookup using the OncoKB Cancer Gene List API (public utilities API, no token required).
+- **New Features (Gap 6):** SIFT, PolyPhen, Caller counts, and COSMIC recurrence have been parsed and added to the feature set. COSMIC is highly predictive of hotspots (as both reflect recurrence) but not perfectly circular (FP rate exists).
 - **Branch B recall = 0%** because synthetic BAMs lack matched normal — real tumour-normal pairs needed.
 - **VAF clonality** is not purity-corrected; raw thresholds underestimate clonal fraction.
-- **TTN/MUC16 in top genes** are passenger size-bias artefacts, not drivers — filter by driver_tier before reporting.
-- **Hotspot Annotation (Gap 5):** The GDC MAF `hotspot` column uses `'Y'` and `'N'` rather than `TRUE`/`FALSE` or `True`/`False`, which broke early parsing scripts. The pipeline now uses the curated CancerHotspots DB.
-- **Unused Annotations (Gap 6):** VEP annotations such as SIFT and PolyPhen are successfully parsed and present for ~64% of the variants, but are not yet incorporated into the ML prioritizer feature set.
+- **TTN/MUC16 in top genes** are passenger size-bias artefacts, not drivers.
+- **Hotspot Annotation (Gap 5):** The native GDC MAF `hotspot` column uses `'Y'` (253 counts) and `'N'` rather than boolean formatting, breaking earlier parsers. 
+- **Regex vs Curated Hotspots (Gap 2):** The old regex-based hotspot matched 63 variants vs 248 in CancerHotspots, yielding a Precision of 90.48% but a Recall of only 22.98% against the curated DB.

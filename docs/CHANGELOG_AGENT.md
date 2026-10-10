@@ -1,23 +1,34 @@
 # Agent Changelog — Annotation Gaps Fixes
 
 ## 1. Gap 1: ML Target Leakage (AUC = 1.0)
-- **Fix:** Removed `driver_tier` and `consequence_score` from the ML features since they directly defined the positive class. Replaced `StratifiedKFold` with `GroupKFold` grouped by gene so the model evaluates generalizability across different genes.
+- **Fix:** Redefined the ML task entirely to prevent leakage. The model now predicts whether a variant is a true hotspot (label `y` = `is_hotspot` from CancerHotspots.org) using biological features. `driver_tier` and `consequence_score` are now used strictly as features, not labels. `GroupKFold` grouped by gene is maintained.
 - **Before:** AUC 1.0
-- **After:** AUC ~0.55 (Expected as VAF/depth alone aren't highly predictive without driver/pathway info)
+- **After:** RF CV AUC 0.987 ± 0.011, PR-AUC 0.268 ± 0.252. The task is highly imbalanced (248 positive examples out of 62k).
 
 ## 2. Gap 2: Regex is_hotspot
-- **Fix:** Downloaded the CancerHotspots DB (v2) and converted it to CSV. Rewrote the logic in `04_ml_prioritizer.py` to check `Hugo_Symbol` and the parsed genomic position from `HGVSp_Short` against the curated DB.
-- **Result:** ~99.68% agreement between the old regex approach and the new curated CancerHotspots DB.
+- **Fix:** Used the curated CancerHotspots DB (v2) for variant matching instead of regex.
+- **Metrics against Curated DB:**
+  - CancerHotspots Count: 248
+  - Regex Count: 63
+  - Precision: 90.48% (Regex rarely flags non-hotspots)
+  - Recall: 22.98% (Regex missed 191 true hotspots!)
 
 ## 3. Gap 3: Hardcoded driver_tier
-- **Fix:** Downloaded the OncoKB Cancer Gene List via their API. Refactored `04_ml_prioritizer.py` to assign a tier of 2 to variants in OncoKB annotated genes, storing the previous hardcoded lists under `driver_tier_legacy`.
+- **Fix:** Replaced hardcoded driver tiers with the official OncoKB Cancer Gene List, downloaded via their public API (no token required). Kept tier distinction: variants receive Tier 2 if the gene is in both OncoKB and COSMIC CGC, Tier 1 if only one of them, and Tier 0 otherwise.
 
 ## 4. Gap 4: Explicit gnomAD filter
-- **Fix:** Added a `GNOMAD_MAX_AF_THRESH = 0.001` configuration variable to both `04_ml_prioritizer.py` and `05_full_branch_a.py`.
-- **Result:** Removed 3 variants with `gnomAD_AF > 0.001` during the filtering step.
+- **Fix:** Filtered variants with `gnomAD_AF > 0.001`.
+- **Result:** Removed exactly 3 variants. (There were exactly 3 variants strictly greater than the 0.001 threshold in this dataset).
 
 ## 5. Gap 5: Debug the hotspot column
-- **Finding:** The native `hotspot` column in the MAF uses `'Y'` and `'N'` instead of boolean `TRUE`/`FALSE`. Documented this finding in the README.
+- **Finding:** The native `hotspot` column in the MAF contains `'Y'` and `'N'` instead of boolean `TRUE`/`FALSE`. Exactly 253 variants have `'Y'`. Documented this limitation.
 
-## 6. Gap 6: Unused annotations (SIFT/PolyPhen)
-- **Finding:** Wrote and ran `scripts/check_sift.py`. Validated that SIFT and PolyPhen annotations from VEP are present in ~64.3% and 64.7% of the variants, respectively. Documented this limitation in the README.
+## 6. Gap 6: Unused annotations (SIFT/PolyPhen/COSMIC/Callers)
+- **Fix:** Successfully parsed and integrated `SIFT`, `PolyPhen`, `caller_count`, and `COSMIC` into the ML features. 
+- **Circularity Check:** Checked `COSMIC` for circularity against the hotspot label. While highly correlated (nearly all hotspots are in COSMIC), it is not perfectly circular because 34,384 non-hotspot variants are also in COSMIC (false positives).
+
+## 7. Gap 7: ClinVar
+- **Decision:** Documented that ClinVar was excluded from features due to extreme sparsity (0.9% coverage). It is not useful for training the main ML prioritizer.
+
+## 8. Gap 8: Reproducibility
+- **Fix:** Pinned all Python dependencies to `requirements.txt` using `pip freeze`, and set fixed `random_state=42` across ML models for determinism.

@@ -102,10 +102,25 @@ def build_feature_matrix(maf_df):
     oncokb_path = Path(__file__).resolve().parent.parent / "data" / "oncokb_cancer_gene_list.txt"
     if oncokb_path.exists():
         oncokb_df = pd.read_csv(oncokb_path, sep="\t")
-        oncokb_genes = set(oncokb_df[oncokb_df["OncoKB Annotated"] == "Yes"]["Hugo Symbol"])
-        df["driver_tier"] = df[gene_col].apply(lambda x: 2 if x in oncokb_genes else 0)
+        oncokb_annotated = set(oncokb_df[oncokb_df["OncoKB Annotated"] == "Yes"]["Hugo Symbol"])
+        cosmic_cgc = set(oncokb_df[oncokb_df["COSMIC CGC (v99)"] == "Yes"]["Hugo Symbol"])
+        
+        def assign_tier(g):
+            if g in oncokb_annotated and g in cosmic_cgc: return 2
+            if g in oncokb_annotated or g in cosmic_cgc: return 1
+            return 0
+        df["driver_tier"] = df[gene_col].apply(assign_tier)
     else:
         df["driver_tier"] = df["driver_tier_legacy"]
+
+    # Consequence score
+    CONSEQUENCE_MAP = {
+        "Nonsense_Mutation": 8, "Splice_Site": 7, "Missense_Mutation": 5,
+        "In_Frame_Del": 4, "In_Frame_Ins": 4,
+        "Frame_Shift_Del": 6, "Frame_Shift_Ins": 6,
+        "Silent": 1
+    }
+    df["consequence_score"] = df["Variant_Classification"].map(CONSEQUENCE_MAP).fillna(0)
 
     # Pathway membership
     df["pathway"] = df[gene_col].map(PATHWAY_MAP).fillna("Other")
@@ -151,25 +166,43 @@ def build_feature_matrix(maf_df):
     else:
         df["pop_af"] = 0.0
 
+    # New features: SIFT, PolyPhen, callers, COSMIC
+    if "SIFT" in df.columns:
+        df["sift_score"] = df["SIFT"].str.extract(r'\(([\d\.]+)\)').astype(float).fillna(-1.0)
+    else: df["sift_score"] = -1.0
+        
+    if "PolyPhen" in df.columns:
+        df["polyphen_score"] = df["PolyPhen"].str.extract(r'\(([\d\.]+)\)').astype(float).fillna(-1.0)
+    else: df["polyphen_score"] = -1.0
+        
+    if "callers" in df.columns:
+        df["caller_count"] = df["callers"].fillna("").apply(lambda x: len(x.split(";")) if x else 0)
+    else: df["caller_count"] = 1
+        
+    if "COSMIC" in df.columns:
+        df["in_cosmic"] = df["COSMIC"].notna().astype(float)
+    else: df["in_cosmic"] = 0.0
+
     features = [
-        "vaf", "depth", 
-        "clonality_score", "is_snv", "is_hotspot", "pop_af",
+        "vaf", "depth", "driver_tier", "consequence_score",
+        "clonality_score", "is_snv", "pop_af",
+        "sift_score", "polyphen_score", "caller_count", "in_cosmic"
     ]
     return df, features, gene_col
 
 def train_rf_xgb(X, y_labels, feature_names, groups):
     """Train Random Forest and XGBoost on binary labels (driver=1, passenger=0)."""
     from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-    from sklearn.model_selection import GroupKFold, cross_val_score
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.metrics import roc_auc_score
+    from sklearn.model_selection import GroupKFold
+    from sklearn.metrics import roc_auc_score, average_precision_score
     import numpy as np
+    from scipy import stats
 
     # Replace NaN
-    X = np.nan_to_num(X, nan=0.0, posinf=1.0, neginf=0.0)
+    X = np.nan_to_num(X, nan=-1.0, posinf=1.0, neginf=-1.0)
 
     print(f"Training on {X.shape[0]} variants, {X.shape[1]} features")
-    print(f"  Driver variants (y=1): {y_labels.sum()} / {len(y_labels)}")
+    print(f"  Hotspot variants (y=1): {y_labels.sum()} / {len(y_labels)}")
 
     rf = RandomForestClassifier(n_estimators=200, max_depth=6, random_state=42, n_jobs=6)
     xgb = GradientBoostingClassifier(n_estimators=200, max_depth=4, learning_rate=0.05, random_state=42)
@@ -180,15 +213,42 @@ def train_rf_xgb(X, y_labels, feature_names, groups):
         print("  Warning: too few positive labels for CV — using full dataset")
         rf.fit(X, y_labels)
         xgb.fit(X, y_labels)
-        rf_auc = 0.0
-        xgb_auc = 0.0
+        rf_auc, xgb_auc, rf_pr, xgb_pr = 0.0, 0.0, 0.0, 0.0
     else:
-        rf_scores  = cross_val_score(rf,  X, y_labels, groups=groups, cv=cv, scoring="roc_auc")
-        xgb_scores = cross_val_score(xgb, X, y_labels, groups=groups, cv=cv, scoring="roc_auc")
-        rf_auc  = rf_scores.mean()
-        xgb_auc = xgb_scores.mean()
-        print(f"  RF  CV AUC: {rf_auc:.3f} ± {rf_scores.std():.3f}")
-        print(f"  XGB CV AUC: {xgb_auc:.3f} ± {xgb_scores.std():.3f}")
+        rf_aucs, xgb_aucs, rf_prs, xgb_prs = [], [], [], []
+        for train_idx, test_idx in cv.split(X, y_labels, groups):
+            if y_labels[train_idx].sum() == 0 or y_labels[test_idx].sum() == 0: continue
+            
+            rf.fit(X[train_idx], y_labels[train_idx])
+            xgb.fit(X[train_idx], y_labels[train_idx])
+            
+            rf_pred = rf.predict_proba(X[test_idx])[:, 1]
+            xgb_pred = xgb.predict_proba(X[test_idx])[:, 1]
+            
+            rf_aucs.append(roc_auc_score(y_labels[test_idx], rf_pred))
+            xgb_aucs.append(roc_auc_score(y_labels[test_idx], xgb_pred))
+            rf_prs.append(average_precision_score(y_labels[test_idx], rf_pred))
+            xgb_prs.append(average_precision_score(y_labels[test_idx], xgb_pred))
+            
+        rf_auc = np.mean(rf_aucs)
+        xgb_auc = np.mean(xgb_aucs)
+        rf_pr = np.mean(rf_prs)
+        xgb_pr = np.mean(xgb_prs)
+        
+        # CI calculation
+        def ci(scores):
+            m, se = np.mean(scores), stats.sem(scores)
+            h = se * stats.t.ppf((1 + 0.95) / 2., len(scores)-1)
+            return m, h
+
+        rf_auc_m, rf_auc_h = ci(rf_aucs)
+        xgb_auc_m, xgb_auc_h = ci(xgb_aucs)
+        rf_pr_m, rf_pr_h = ci(rf_prs)
+        xgb_pr_m, xgb_pr_h = ci(xgb_prs)
+        
+        print(f"  RF  CV AUC: {rf_auc_m:.3f} ± {rf_auc_h:.3f}, PR-AUC: {rf_pr_m:.3f} ± {rf_pr_h:.3f}")
+        print(f"  XGB CV AUC: {xgb_auc_m:.3f} ± {xgb_auc_h:.3f}, PR-AUC: {xgb_pr_m:.3f} ± {xgb_pr_h:.3f}")
+        
         rf.fit(X, y_labels)
         xgb.fit(X, y_labels)
 
@@ -227,8 +287,8 @@ def main():
     # Build feature matrix
     df, features, gene_col = build_feature_matrix(maf)
 
-    # Labels: tier-1 driver gene missense/nonsense = positive class
-    y = ((df["driver_tier"] >= 1) & (df["consequence_score"] >= 7)).astype(int).values
+    # Labels: CancerHotspots = positive class
+    y = df["is_hotspot"].astype(int).values
     X = df[features].values
     groups = df[gene_col].values
 
@@ -289,9 +349,23 @@ def main():
     print(f"RF AUC: {rf_auc:.3f}  XGB AUC: {xgb_auc:.3f}")
     print(f"Actionable variants: {report['actionable_variants_found']}")
     
-    # Report agreement between regex and curated hotspot
-    agreement = (df["is_hotspot"] == df["is_hotspot_regex"]).mean()
-    print(f"Hotspot Agreement (Regex vs Curated): {agreement:.2%}")
+    from sklearn.metrics import precision_score, recall_score, confusion_matrix
+    
+    mask = df["is_hotspot_regex"].notna() & df["is_hotspot"].notna()
+    y_true = df.loc[mask, "is_hotspot"].values
+    y_pred = df.loc[mask, "is_hotspot_regex"].values
+    
+    prec = precision_score(y_true, y_pred, zero_division=0)
+    rec = recall_score(y_true, y_pred, zero_division=0)
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    
+    print("\nHotspot Annotation Comparison:")
+    print(f"  CancerHotspots Count: {int(y_true.sum())}")
+    print(f"  Regex Hotspots Count: {int(y_pred.sum())}")
+    print(f"  Regex Precision against CancerHotspots: {prec:.2%}")
+    print(f"  Regex Recall against CancerHotspots: {rec:.2%}")
+    print(f"  FP={fp}, FN={fn}")
+    
     print("=== DONE ===")
 
 if __name__ == "__main__":
