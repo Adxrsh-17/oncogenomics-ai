@@ -1,31 +1,46 @@
 {
-  "rf_cv_auc": 0.5492,
-  "xgb_cv_auc": 0.5428,
+  "rf_cv_auc": 0.9867,
+  "xgb_cv_auc": 0.9839,
   "n_variants": 62143,
-  "n_positive_class": 3743,
+  "n_positive_class": 248,
   "features": [
     "vaf",
     "depth",
+    "driver_tier",
+    "consequence_score",
     "clonality_score",
     "is_snv",
-    "is_hotspot",
-    "pop_af"
+    "pop_af",
+    "sift_score",
+    "polyphen_score",
+    "caller_count",
+    "in_cosmic"
   ],
   "rf_feature_importance": {
-    "vaf": 0.0663,
-    "depth": 0.0577,
-    "clonality_score": 0.0022,
-    "is_snv": 0.0257,
-    "is_hotspot": 0.8481,
-    "pop_af": 0.0
+    "vaf": 0.1014,
+    "depth": 0.1076,
+    "driver_tier": 0.4213,
+    "consequence_score": 0.0293,
+    "clonality_score": 0.0185,
+    "is_snv": 0.0111,
+    "pop_af": 0.0,
+    "sift_score": 0.0521,
+    "polyphen_score": 0.1707,
+    "caller_count": 0.0064,
+    "in_cosmic": 0.0815
   },
   "xgb_feature_importance": {
-    "vaf": 0.1463,
-    "depth": 0.0661,
+    "vaf": 0.2372,
+    "depth": 0.235,
+    "driver_tier": 0.1267,
+    "consequence_score": 0.0398,
     "clonality_score": 0.0,
-    "is_snv": 0.036,
-    "is_hotspot": 0.7515,
-    "pop_af": 0.0
+    "is_snv": 0.0228,
+    "pop_af": 0.0,
+    "sift_score": 0.046,
+    "polyphen_score": 0.2201,
+    "caller_count": 0.001,
+    "in_cosmic": 0.0714
   },
   "actionable_variants_found": 29
 }
