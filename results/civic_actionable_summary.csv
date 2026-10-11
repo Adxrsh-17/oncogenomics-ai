@@ -1,0 +1,13 @@
+gene,variant,profile,evidence_item_count,evidence_levels,approved_therapies,civic_profile_id
+KRAS,G12C,KRAS G12C,20,B/C/D,ARS-1620; Cetuximab; Erlotinib; Gefitinib; Melphalan; Palbociclib; Panitumumab; Sotorasib,78
+KRAS,G12D,KRAS G12D,20,B/C/D,Akt Inhibitor MK2206; Cetuximab; Erlotinib; Gefitinib; Melphalan; Panitumumab; Sunitinib,79
+KRAS,G12V,KRAS G12V,20,B/C/D,Cetuximab; Crizotinib; Erlotinib; Gefitinib; Palbociclib; Panitumumab; Sunitinib,421
+EGFR,L858R,EGFR L858R,20,B/C/D,Afatinib; Canertinib; Cetuximab; Dacomitinib; Erlotinib; Gefitinib; Lapatinib; Multikinase Inhibitor AEE788; Neratinib,33
+EGFR,T790M,EGFR T790M,20,A/B/C/D/E,Afatinib; Bosutinib; Canertinib; Dacomitinib; Erlotinib; Gefitinib; Lazertinib; Osimertinib; Rociletinib; Staurosporine,34
+BRAF,V600E,BRAF V600E,20,B/C/D,Dabrafenib; Mirdametinib; Selumetinib; Sorafenib; Trametinib; Vemurafenib,12
+PIK3CA,E545K,PIK3CA E545K,20,B/C/D,Akt Inhibitor MK2206; Apitolisib; Aspirin; Cetuximab; Cisplatin; Dactolisib; Gefitinib; Ionizing Radiotherapy; Lapatinib; PI-103; PI103; PI3Ka/Di; Panitumumab; Pictilisib; Trastuzumab,104
+PIK3CA,H1047R,PIK3CA H1047R,20,B/C/D,Alpelisib; Aspirin; Capivasertib; Cetuximab; Dactolisib; Everolimus; Fulvestrant; Izorlisib; Lapatinib; Panitumumab; Perifosine; Taselisib; Temsirolimus; Trastuzumab; Vemurafenib,107
+TP53,R175H,TP53 R175H,12,B/C/D,Doxorubicin; EAP Protocol; MDM2 Inhibitor AMGMDS3,116
+TP53,R273H,TP53 R273H,13,B/C/D,Doxorubicin; MDM2 Inhibitor AMGMDS3; Methotrexate; Tamoxifen; Temozolomide,122
+ERBB2,V777L,ERBB2 V777L,20,C/D,Afatinib; Cetuximab; Everolimus; Fulvestrant; Lapatinib; Neratinib; Osimertinib; Palbociclib; Trastuzumab; Trastuzumab Emtansine,44
+MET,Exon 14 Skipping,MET Exon 14 Skipping,20,A/B/C/D,Cabozantinib; Capmatinib; Crizotinib; SAIT301; Tepotinib,320
