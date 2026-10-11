@@ -1,0 +1,50 @@
+# OncoSeq-AI: NVIDIA Parabricks GPU Mutect2 Containerization
+# Base image: Ubuntu 22.04 with CUDA 12.2 (Provides GLIBC 2.35, resolving the GLIBC 2.31 vs >=2.34 mismatch)
+FROM nvidia/cuda:12.2.2-runtime-ubuntu22.04
+
+LABEL maintainer="OncoSeq-AI Team"
+LABEL description="GPU-accelerated somatic variant calling using NVIDIA Clara Parabricks on Ubuntu 22.04"
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# Install base dependencies and Java 17 for GATK4 compatibility
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    curl \
+    bzip2 \
+    ca-certificates \
+    libglib2.0-0 \
+    libxext6 \
+    libsm6 \
+    libxrender1 \
+    git \
+    openjdk-17-jre-headless \
+    python3 \
+    python3-pip \
+    samtools \
+    tabix \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir numpy pandas scipy pysam requests
+
+# Install GATK 4.5.0.0
+WORKDIR /opt/gatk
+RUN wget -q "https://github.com/broadinstitute/gatk/releases/download/4.5.0.0/gatk-4.5.0.0.zip" && \
+    apt-get update && apt-get install -y unzip && \
+    unzip -q gatk-4.5.0.0.zip && \
+    rm gatk-4.5.0.0.zip && \
+    ln -s /opt/gatk/gatk-4.5.0.0/gatk /usr/local/bin/gatk
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy runner script
+COPY run_parabricks.sh /usr/local/bin/run_parabricks.sh
+RUN chmod +x /usr/local/bin/run_parabricks.sh
+
+ENTRYPOINT ["/usr/local/bin/run_parabricks.sh"]
