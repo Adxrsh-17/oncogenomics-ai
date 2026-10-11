@@ -10,8 +10,13 @@ import pandas as pd
 import numpy as np
 
 import os
-MAF_FULL = Path(os.environ.get("ONCOSEQ_MAF", "/opt/ml/input/data/notebook/oncoseq/mafs/tcga_luad_full_merged.maf"))
-OUT_DIR  = Path(os.environ.get("ONCOSEQ_OUT", "/opt/ml/input/data/notebook/oncoseq/results"))
+LOCAL_MAF = Path(__file__).resolve().parent.parent / "results" / "tcga_luad_merged.maf"
+DEFAULT_MAF = str(LOCAL_MAF) if LOCAL_MAF.exists() else "/opt/ml/input/data/notebook/oncoseq/mafs/tcga_luad_full_merged.maf"
+LOCAL_OUT = Path(__file__).resolve().parent.parent / "results" / "sagemaker"
+DEFAULT_OUT = str(LOCAL_OUT) if not Path("/opt/ml").exists() else "/opt/ml/input/data/notebook/oncoseq/results"
+
+MAF_FULL = Path(os.environ.get("ONCOSEQ_MAF", DEFAULT_MAF))
+OUT_DIR  = Path(os.environ.get("ONCOSEQ_OUT", DEFAULT_OUT))
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 GNOMAD_MAX_AF_THRESH = 0.001

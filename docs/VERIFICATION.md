@@ -20,9 +20,9 @@
    - Positives: 248, Total: 62,143
    - Positive rate (Random Baseline): `248 / 62143 = 0.004`
 6. **Per-fold Variance Explained:**
-   - *Note: The earlier discrepancy in PR-AUC values was caused by GroupKFold assigning genes to folds in ways that grouped highly prevalent hotspots (like TP53 and KRAS) unevenly. We have updated `04_ml_prioritizer.py` to use a 10-repeat shuffle pooled out-of-fold PR-AUC, reporting `0.258 ± 0.024` (95% CI half-width) rather than a single fold-average std. This explicitly controls for repeat-to-repeat fold assignment variability.*
+   - *Note: Standard unrepeated `GroupKFold` clustered dominant hotspot genes (such as TP53 and KRAS) unevenly into individual folds, causing run-to-run fold variance. `04_ml_prioritizer.py` uses a 10-repeat gene-shuffled disjoint group split (5 folds per repeat, partitioned over unique `Hugo_Symbol` groups) to compute pooled out-of-fold PR-AUC, reporting `0.257 ± 0.024` (95% CI half-width).*
 
-7. **Duplicates in train/test:** Guaranteed **zero** by `GroupKFold` split on `Hugo_Symbol`. Because duplicates of the same genomic position must map to the same gene, they are forced entirely into a single fold, meaning they can never appear in both the training set and the test set simultaneously.
+7. **Duplicates in train/test:** Guaranteed **zero** by the gene-disjoint group split on `Hugo_Symbol`. Because all mutations within the same gene are strictly assigned to either train or test within any fold, duplicate positions and co-gene variants can never appear in both training and test sets simultaneously.
 8. **Label overlap:** CancerHotspots was built partly on TCGA mutation data. Since this cohort is TCGA-LUAD, there is an inherent overlap: the model is evaluated on samples that were used to define the ground-truth database.
 
 ## C. Data and Annotation
@@ -97,7 +97,7 @@
 | 4. Driver Tier Baseline | Yes | `verification_stats.py` (PR-AUC: 0.092) |
 | 5. Positive Rate Baseline | Yes | `248 / 62143 = 0.00399` |
 | 6. Per-fold Genes/Variance | Yes | `verification_stats.py` 10-repeat summary |
-| 7. Duplicates in Train/Test | Yes | `GroupKFold` mechanism |
+| 7. Duplicates in Train/Test | Yes | 10-repeat gene-disjoint group split |
 | 8. TCGA Label Overlap | Yes | README Limitations note |
 | 9. gnomAD Missing Values | Yes | 53,744 missing; correctly treated as 0 |
 | 10. CancerHotspot Match | Yes | Parsed via regex `Group(2)` (position) |

@@ -103,8 +103,6 @@ export function lookupActionability(gene, hgvsp) {
 }
 
 export async function runPipeline(variants, onStep) {
-  const results = [];
-
   // Step 1: Load
   onStep({ step: 'load', progress: 0, message: 'Loading variant records…' });
   await delay(300);

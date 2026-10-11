@@ -86,7 +86,8 @@ def main():
     if oncokb_path.exists():
         okb_df = pd.read_csv(oncokb_path, sep="\t")
         oncokb_genes = set(okb_df[okb_df["OncoKB Annotated"] == "Yes"]["Hugo Symbol"])
-        cosmic_cgc_genes = set(okb_df[okb_df["COSMIC CGC (v99)"] == "Yes"]["Hugo Symbol"])
+        cgc_col = next((c for c in okb_df.columns if "cgc" in c.lower()), "COSMIC CGC (v99)")
+        cosmic_cgc_genes = set(okb_df[okb_df[cgc_col] == "Yes"]["Hugo Symbol"])
         print(f"Loaded OncoKB ({len(oncokb_genes)}) & CGC ({len(cosmic_cgc_genes)}) genes.")
 
     # 3. Stream MAF for cohort aggregates (recurrent counts, caller concordance, gnomAD rates)
