@@ -69,8 +69,8 @@ def run_mutect2(tumor_bam, normal_bam, ref_fa, region, vcf_out):
         log(f"  Mutect2 FAILED: {result.stderr[-500:]}")
     return result.returncode == 0, elapsed
 
-def filter_mutect_calls(vcf_in, vcf_filt_out):
-    """Run FilterMutectCalls to get PASS variants."""
+def filter_mutect_calls(vcf_in, vcf_filt_out, ref_fa=None, contamination_table=None, ob_priors=None):
+    """Run FilterMutectCalls to get PASS variants, supporting GATK Best Practices models."""
     cmd = [
         JAVA, "-Xmx4g", "-jar", str(GATK),
         "FilterMutectCalls",
@@ -78,6 +78,12 @@ def filter_mutect_calls(vcf_in, vcf_filt_out):
         "-O", str(vcf_filt_out),
         "--verbosity", "ERROR",
     ]
+    if ref_fa and Path(ref_fa).exists():
+        cmd += ["-R", str(ref_fa)]
+    if contamination_table and Path(contamination_table).exists():
+        cmd += ["--contamination-table", str(contamination_table)]
+    if ob_priors and Path(ob_priors).exists():
+        cmd += ["--ob-priors", str(ob_priors)]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     return result.returncode == 0
 
