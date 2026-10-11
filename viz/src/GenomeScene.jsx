@@ -1,5 +1,5 @@
-import { useRef, useMemo, useEffect, useState } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useRef, useMemo } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Text, Line } from '@react-three/drei'
 import * as THREE from 'three'
 
@@ -8,7 +8,6 @@ const CHR_LENGTHS = [
   248,242,198,190,181,170,159,145,138,133,
   135,133,114,107,101,90,83,80,58,64,46,50
 ];
-const TOTAL_MB = CHR_LENGTHS.reduce((a,b)=>a+b,0);
 
 const PATHWAY_COLORS = {
   'RAS/MAPK': '#58a6ff',
@@ -147,12 +146,15 @@ function ParticleField({ active }) {
   const positions = useMemo(() => {
     const pos = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
-      pos[i*3]   = (Math.random()-0.5) * 24
-      pos[i*3+1] = (Math.random()-0.5) * 12
-      pos[i*3+2] = (Math.random()-0.5) * 24
+      const r1 = Math.abs(Math.sin(i * 12.9898 + 78.233)) % 1
+      const r2 = Math.abs(Math.sin(i * 39.346 + 11.135)) % 1
+      const r3 = Math.abs(Math.sin(i * 73.156 + 45.164)) % 1
+      pos[i*3]   = (r1 - 0.5) * 24
+      pos[i*3+1] = (r2 - 0.5) * 12
+      pos[i*3+2] = (r3 - 0.5) * 24
     }
     return pos
-  }, [])
+  }, [count])
 
   useFrame((s) => {
     if (ref.current) {

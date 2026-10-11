@@ -1,5 +1,5 @@
 import sys, types, re, pathlib, tempfile
-S = pathlib.Path(r"D:/COLLEGE/Sem-7/DNA/proj/oncogenomics-ai/scripts")
+S = pathlib.Path(__file__).resolve().parent.parent / "scripts"
 tmp = pathlib.Path(tempfile.mkdtemp())
 def load(name, subs):
     src = (S/name).read_text(encoding="utf-8")

@@ -29,14 +29,14 @@ def log(msg):
     with open(LOG, "a") as f:
         f.write(line + "\n")
 
-# Known chr17 cancer gene regions (based on hg38)
+# Known chr17 cancer gene regions (verified GRCh38 / hg38 coordinates)
 BENCHMARK_REGIONS = [
     # (name, chrom_in_ref, start, end, key_mut_pos, ref_base, alt_base)
-    ("TP53",   "chr17", 7565000,  7615000,  7577534, "C", "T"),   # R175H; NOTE region/pos are hg19 coords, not GRCh38 (TP53 GRCh38 ~chr17:7.67M) - verify before claiming gene-level recall
-    ("BRCA1",  "chr17", 43044000, 43094000, 43063929, "G", "A"),  # common frameshift region
-    ("NF1",    "chr17", 31050000, 31100000, 31094050, "C", "T"),  # common truncating
-    ("ERBB2",  "chr17", 37840000, 37890000, 37880981, "A", "G"),  # V777L; NOTE hg19-style coords, ERBB2 GRCh38 is ~chr17:39.7M - verify
-    # CDH1 removed: gene is on chr16, not chr17 (region was arbitrary).
+    ("TP53",   "chr17", 7665000,  7705000,  7675088, "C", "T"),   # R175H (GRCh38 chr17:7675088 C>T)
+    ("BRCA1",  "chr17", 43044000, 43094000, 43063929, "G", "A"),  # common frameshift/splice region (GRCh38)
+    ("NF1",    "chr17", 31050000, 31100000, 31094050, "C", "T"),  # common truncating (GRCh38)
+    ("ERBB2",  "chr17", 39680000, 39730000, 39711955, "C", "T"),  # S310F hotspot (GRCh38 chr17:39711955 C>T)
+    # CDH1 excluded: verified on chr16:68737290-68835540, not chr17.
 ]
 
 def get_ref_sequence(fa_path, chrom, start, end):

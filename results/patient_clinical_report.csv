@@ -3,10 +3,10 @@ TCGA-49-4505,YES,no,231,Sotorasib
 TCGA-05-4418,YES,no,301,Sotorasib
 TCGA-17-Z042,YES,no,511,Sotorasib
 TCGA-78-7145,YES,no,202,Sotorasib
-TCGA-MP-A4T9,no,YES,36, / Osimertinib
+TCGA-MP-A4T9,no,YES,36,Osimertinib
 TCGA-67-3774,YES,no,121,Sotorasib
 TCGA-50-5051,YES,no,123,Sotorasib
-TCGA-MP-A4SW,no,YES,69, / Osimertinib
+TCGA-MP-A4SW,no,YES,69,Osimertinib
 TCGA-NJ-A4YI,YES,no,502,Sotorasib
 TCGA-55-8207,YES,no,351,Sotorasib
 TCGA-55-6983,YES,no,114,Sotorasib
@@ -14,17 +14,17 @@ TCGA-MP-A4TD,YES,no,88,Sotorasib
 TCGA-05-4244,YES,no,230,Sotorasib
 TCGA-J2-8194,YES,no,161,Sotorasib
 TCGA-55-7914,YES,no,189,Sotorasib
-TCGA-62-8394,no,YES,138, / Osimertinib
+TCGA-62-8394,no,YES,138,Osimertinib
 TCGA-99-8028,YES,no,405,Sotorasib
 TCGA-05-4249,YES,no,340,Sotorasib
 TCGA-55-8203,YES,no,464,Sotorasib
-TCGA-L9-A50W,no,YES,33, / Osimertinib
-TCGA-49-4490,no,YES,41, / Osimertinib
-TCGA-55-8506,no,YES,1922, / Osimertinib
+TCGA-L9-A50W,no,YES,33,Osimertinib
+TCGA-49-4490,no,YES,41,Osimertinib
+TCGA-55-8506,no,YES,1922,Osimertinib
 TCGA-55-1595,YES,no,341,Sotorasib
-TCGA-97-8177,no,YES,36, / Osimertinib
+TCGA-97-8177,no,YES,36,Osimertinib
 TCGA-55-8302,YES,no,735,Sotorasib
 TCGA-75-5126,YES,no,637,Sotorasib
 TCGA-97-A4M5,YES,no,162,Sotorasib
-TCGA-55-8096,no,YES,153, / Osimertinib
+TCGA-55-8096,no,YES,153,Osimertinib
 TCGA-MP-A4TF,YES,no,451,Sotorasib

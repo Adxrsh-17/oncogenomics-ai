@@ -155,9 +155,13 @@ def build_feature_matrix(maf_df):
             
         df["is_hotspot"] = df.apply(check_curated_hotspot, axis=1)
 
-    # Population frequency proxy (ExAC/gnomAD — use 0 if not available as germline filter)
-    if "ExAC_AF" in df.columns:
-        df["pop_af"] = pd.to_numeric(df["ExAC_AF"], errors="coerce").fillna(0)
+    # Population frequency proxy (gnomAD/MAX_AF/ExAC)
+    if "gnomAD_AF" in df.columns:
+        df["pop_af"] = pd.to_numeric(df["gnomAD_AF"], errors="coerce").fillna(0.0)
+    elif "MAX_AF" in df.columns:
+        df["pop_af"] = pd.to_numeric(df["MAX_AF"], errors="coerce").fillna(0.0)
+    elif "ExAC_AF" in df.columns:
+        df["pop_af"] = pd.to_numeric(df["ExAC_AF"], errors="coerce").fillna(0.0)
     else:
         df["pop_af"] = 0.0
 
@@ -339,10 +343,28 @@ def main():
     def get_action(row):
         gene = str(row.get(gene_col, ""))
         hgvsp = str(row.get("HGVSp_Short", ""))
-        for key, (drug, approval, tier) in ACTIONABLE_VARIANTS.items():
-            g, mut = key.split("_", 1) if "_" in key else (key, "")
-            if gene == g and (not mut or mut in hgvsp):
-                return drug, approval, tier
+        vc = str(row.get("Variant_Classification", ""))
+        vt = str(row.get("Variant_Type", ""))
+
+        if gene == "KRAS" and "G12C" in hgvsp:
+            return "Sotorasib", "FDA-approved", "A"
+        if gene == "EGFR" and "L858R" in hgvsp:
+            return "Osimertinib", "FDA-approved", "A"
+        if gene == "EGFR" and ("del" in hgvsp.lower()) and any(str(c) in hgvsp for c in range(746, 754)):
+            return "Osimertinib", "FDA-approved", "A"
+        if gene == "BRAF" and "V600E" in hgvsp:
+            return "Dabrafenib+Trametinib", "FDA-approved", "A"
+        if gene == "MET" and (vc == "Splice_Site" or "ex14" in hgvsp.lower()):
+            return "Capmatinib", "FDA-approved", "A"
+        if gene in ("RET", "ALK") and (vc in ("Fusion", "Rearrangement") or "fusion" in hgvsp.lower() or vt == "SV"):
+            drug = "Selpercatinib" if gene == "RET" else "Alectinib"
+            return drug, "FDA-approved", "A"
+        if gene == "ERBB2" and (vc in ("Amplification", "Amp") or "amp" in hgvsp.lower()):
+            return "Trastuzumab", "FDA-approved B", "B"
+        if gene == "PIK3CA" and vc not in ("Silent", "Intron", "3'UTR", "5'UTR", "RNA") and hgvsp:
+            return "Alpelisib (trial)", "Phase II", "B"
+        if gene == "BRCA2" and vc not in ("Silent", "Intron", "3'UTR", "5'UTR", "RNA") and hgvsp:
+            return "Olaparib (trial)", "Phase II", "B"
         return "", "", ""
 
     df[["drug", "approval", "tier"]] = df.apply(
