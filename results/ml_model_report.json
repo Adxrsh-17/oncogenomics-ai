@@ -1,6 +1,6 @@
 {
-  "rf_cv_auc": 0.0,
-  "xgb_cv_auc": 0.0,
+  "rf_cv_auc": 0.989,
+  "xgb_cv_auc": null,
   "n_variants": 62143,
   "n_positive_class": 248,
   "features": [

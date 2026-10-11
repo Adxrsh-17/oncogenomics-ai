@@ -14,7 +14,7 @@
 | Real-Reference BAM Generation | ✅ Complete | 5 chr17 regions, actual GRCh38 reference |
 | GATK4 Mutect2 Somatic Calling | ✅ Complete | v4.5.0.0, Java 17, FilterMutectCalls, 5/5 runs |
 | VEP Annotation of VCFs | ✅ Complete | Ensembl REST API, PASS variants annotated |
-| ML Prioritizer (RF + XGBoost) | ✅ Complete | Re-trained to predict CancerHotspots variants; RF CV AUC 0.987, PR-AUC 0.268 (on 248 positive labels) |
+| ML Prioritizer (RF + GradientBoosting) | ✅ Complete | Re-trained to predict CancerHotspots variants; RF pooled OOF AUC 0.989, PR-AUC 0.258 ± 0.024 (248 positive labels); the second model is sklearn GradientBoosting, not cross-validated |
 | Parabricks Extraction | ✅ Complete | pbrun 4.3.1-1 extracted from nvcr.io without Docker |
 | Direct GPU Wall-clock Benchmark | ⚠️ Blocked | GLIBC 2.31 (Ubuntu 20.04) vs required 2.34; GPU active (A10G, 69 GFLOPS via PyTorch) |
 | Interactive Dashboard + Viz | ✅ Complete | React + Vite, Pipeline / Cohort Analysis / GPU Benchmark / Results tabs |
@@ -246,3 +246,12 @@ Since clinical and hotspot databases are frequently updated and subject to licen
 - **COSMIC:** The Cancer Gene Census flag used in `driver_tier` and `in_cosmic` is subject to the restrictive COSMIC license (Sanger Institute). Commercial use requires a paid license. We did not independently scrape COSMIC.
 - **CancerHotspots:** Sourced from `CancerHotspots.org` (v2, MSKCC).
 
+
+## Test Status & Known Data Caveats (2026-10-11)
+
+- See `docs/TEST_REPORT.md`; run `python tests/dry_run_tests.py` (synthetic-data checks, all should pass).
+- `scripts/05` target detection now requires exact gene + `p.G12C` / `p.L858R`. The committed `results/sagemaker/*_full.*` files were produced by the old buggy matcher (KRAS G12C 139/566 is inflated) - **rerun `05` before citing them**. The 198-patient numbers above come from the exact-match notebook logic.
+- Benchmark files: `benchmark_summary.json` (0% recall) is the README result. `results/bench/benchmark_summary.json` (100% recall) is **invalid**: called AF is constant 0.0077 for every planted VAF. `scripts/06` now requires exact position + ALT; `sagemaker/benchmark_realref_summary.json` ("3/5") predates that and used hg19-style coordinates for TP53/ERBB2 (CDH1 region was on the wrong chromosome and was removed). Rerun on SageMaker to refresh.
+- Paths for scripts 03/05/06 can be set via `ONCOSEQ_WORK`, `ONCOSEQ_MAF`, `ONCOSEQ_OUT`.
+- Dashboard: `viz/src/data/*.json` are generated, not committed; the build now tolerates their absence (empty placeholders + banner, `viz/src/data.js`). For real numbers run `python scripts/build_dashboard_data.py` (needs the MAF) before `npm run build`. Dashboard text says 187 patients vs 198 here - reconcile after regenerating. `variants_data.json` positions are illustrative, not true GRCh38 coordinates.
+- GPU in committed summaries: T4 (older files) vs A10G (README/sagemaker); WGS CPU estimates differ (36 h literature vs 189 h extrapolated) - literature value is the one used in figures.

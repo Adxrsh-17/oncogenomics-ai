@@ -58,16 +58,15 @@ ACTIONABLE_VARIANTS = {
 }
 
 def consequence_score(variant_classification):
-    """Map variant classification to numerical severity (0–10)."""
+    """Map variant classification to severity. Values/default (0) match the
+    mapping that produced the published metrics; do not change without rerunning."""
     scores = {
-        "Nonsense_Mutation": 9, "Frame_Shift_Del": 9, "Frame_Shift_Ins": 9,
-        "Splice_Site": 8, "Translation_Start_Site": 8,
-        "Missense_Mutation": 7, "In_Frame_Del": 6, "In_Frame_Ins": 6,
-        "Nonstop_Mutation": 7,
-        "Silent": 1, "3'UTR": 1, "5'UTR": 1, "Intron": 0,
-        "RNA": 0, "lincRNA": 0, "IGR": 0,
+        "Nonsense_Mutation": 8, "Splice_Site": 7, "Missense_Mutation": 5,
+        "In_Frame_Del": 4, "In_Frame_Ins": 4,
+        "Frame_Shift_Del": 6, "Frame_Shift_Ins": 6,
+        "Silent": 1,
     }
-    return scores.get(variant_classification, 3)
+    return scores.get(variant_classification, 0)
 
 def driver_tier(gene):
     if gene in TIER1_DRIVERS: return 2
@@ -94,9 +93,6 @@ def build_feature_matrix(maf_df):
     else:
         df["depth"] = 30
 
-    # Consequence score
-    df["consequence_score"] = df["Variant_Classification"].apply(consequence_score)
-
     # Driver gene score
     gene_col = "Hugo_Symbol" if "Hugo_Symbol" in df.columns else "Gene"
     df["driver_tier_legacy"] = df[gene_col].apply(driver_tier)
@@ -107,7 +103,8 @@ def build_feature_matrix(maf_df):
     if oncokb_path.exists():
         oncokb_df = pd.read_csv(oncokb_path, sep="\t")
         oncokb_annotated = set(oncokb_df[oncokb_df["OncoKB Annotated"] == "Yes"]["Hugo Symbol"])
-        cosmic_cgc = set(oncokb_df[oncokb_df["COSMIC CGC (v99)"] == "Yes"]["Hugo Symbol"])
+        cgc_col = next(c for c in oncokb_df.columns if c.startswith("COSMIC CGC"))
+        cosmic_cgc = set(oncokb_df[oncokb_df[cgc_col] == "Yes"]["Hugo Symbol"])
         
         def assign_tier(g):
             if g in oncokb_annotated and g in cosmic_cgc: return 2
@@ -117,14 +114,8 @@ def build_feature_matrix(maf_df):
     else:
         df["driver_tier"] = df["driver_tier_legacy"]
 
-    # Consequence score
-    CONSEQUENCE_MAP = {
-        "Nonsense_Mutation": 8, "Splice_Site": 7, "Missense_Mutation": 5,
-        "In_Frame_Del": 4, "In_Frame_Ins": 4,
-        "Frame_Shift_Del": 6, "Frame_Shift_Ins": 6,
-        "Silent": 1
-    }
-    df["consequence_score"] = df["Variant_Classification"].map(CONSEQUENCE_MAP).fillna(0)
+    # Consequence score (unmapped classes -> 0)
+    df["consequence_score"] = df["Variant_Classification"].apply(consequence_score)
 
     # Pathway membership
     df["pathway"] = df[gene_col].map(PATHWAY_MAP).fillna("Other")
@@ -376,7 +367,7 @@ def main():
     # Model report
     report = {
         "rf_cv_auc": round(rf_auc, 4),
-        "xgb_cv_auc": round(xgb_auc, 4),
+        "xgb_cv_auc": round(xgb_auc, 4) if xgb_auc else None,  # GB model is not cross-validated
         "n_variants": len(df),
         "n_positive_class": int(y.sum()),
         "features": features,
