@@ -6,7 +6,10 @@ Uses GDC bulk API. Runs on /opt/ml/input/data/notebook/oncoseq/mafs/
 import json, os, requests, subprocess, sys, time
 from pathlib import Path
 
-WORKDIR = Path("/opt/ml/input/data/notebook/oncoseq/mafs")
+LOCAL_RESULTS = Path(__file__).resolve().parent.parent / "results"
+LOCAL_WORKDIR = LOCAL_RESULTS / "mafs"
+SAGEMAKER_WORKDIR = Path("/opt/ml/input/data/notebook/oncoseq/mafs")
+WORKDIR = SAGEMAKER_WORKDIR if Path("/opt/ml").exists() else LOCAL_WORKDIR
 WORKDIR.mkdir(parents=True, exist_ok=True)
 LOG = WORKDIR / "download.log"
 

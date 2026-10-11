@@ -1,0 +1,55 @@
+{
+  "mean_cpu_s_per_region": 8.04,
+  "wgs_cpu_hours": 36.0,
+  "parabricks_speedup": 56.8,
+  "parabricks_hours": 0.63,
+  "parabricks_minutes": 38.0,
+  "overall_recall": 1.0,
+  "gdc_reference_cohort": {
+    "kras_g12c_patients": 21,
+    "egfr_l858r_patients": 8
+  },
+  "kras_recall_by_vaf": {
+    "0.05": true,
+    "0.1": true,
+    "0.2": true,
+    "0.3": true,
+    "0.5": true
+  },
+  "egfr_recall_by_vaf": {
+    "0.05": true,
+    "0.1": true,
+    "0.2": true,
+    "0.3": true,
+    "0.5": true
+  },
+  "vaf_pearson_r": -0.0,
+  "vaf_mae": 0.2223,
+  "vaf_bias": -0.2223,
+  "low_vaf_bins": [
+    {
+      "vaf_bin": "0.00-0.10",
+      "total_variants": 2,
+      "detected": 2,
+      "recall": 1.0
+    },
+    {
+      "vaf_bin": "0.10-0.20",
+      "total_variants": 2,
+      "detected": 2,
+      "recall": 1.0
+    },
+    {
+      "vaf_bin": "0.20-0.30",
+      "total_variants": 2,
+      "detected": 2,
+      "recall": 1.0
+    },
+    {
+      "vaf_bin": "0.30-1.00",
+      "total_variants": 4,
+      "detected": 4,
+      "recall": 1.0
+    }
+  ]
+}

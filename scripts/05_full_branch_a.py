@@ -9,9 +9,17 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-MAF_FULL = Path("/opt/ml/input/data/notebook/oncoseq/mafs/tcga_luad_full_merged.maf")
-OUT_DIR  = Path("/opt/ml/input/data/notebook/oncoseq/results")
-OUT_DIR.mkdir(exist_ok=True)
+LOCAL_RESULTS = Path(__file__).resolve().parent.parent / "results"
+LOCAL_MAF = LOCAL_RESULTS / "tcga_luad_merged.maf"
+SAGEMAKER_MAF = Path("/opt/ml/input/data/notebook/oncoseq/mafs/tcga_luad_full_merged.maf")
+
+if LOCAL_MAF.exists():
+    MAF_FULL = LOCAL_MAF
+    OUT_DIR = LOCAL_RESULTS
+else:
+    MAF_FULL = SAGEMAKER_MAF
+    OUT_DIR = Path("/opt/ml/input/data/notebook/oncoseq/results")
+OUT_DIR.mkdir(exist_ok=True, parents=True)
 
 GNOMAD_MAX_AF_THRESH = 0.001
 
@@ -33,29 +41,22 @@ DRUG_MAP = {
 
 def identify_targets(maf):
     """Find KRAS G12C and EGFR L858R patients."""
-    kras_mask = pd.Series([False]*len(maf), index=maf.index)
-    egfr_mask = pd.Series([False]*len(maf), index=maf.index)
+    is_kras = maf["Hugo_Symbol"] == "KRAS" if "Hugo_Symbol" in maf.columns else False
+    is_egfr = maf["Hugo_Symbol"] == "EGFR" if "Hugo_Symbol" in maf.columns else False
 
-    if "HGVSp_Short" in maf.columns:
-        kras_mask |= maf["HGVSp_Short"].fillna("").str.contains("G12C")
-        egfr_mask |= maf["HGVSp_Short"].fillna("").str.contains("L858R")
+    hgvsp = maf["HGVSp_Short"].fillna("") if "HGVSp_Short" in maf.columns else pd.Series("", index=maf.index)
+    kras_prot = is_kras & hgvsp.str.contains("G12C")
+    egfr_prot = is_egfr & hgvsp.str.contains("L858R")
 
-    if "Hugo_Symbol" in maf.columns and "Chromosome" in maf.columns:
-        kras_mask |= (maf["Hugo_Symbol"] == "KRAS") & kras_mask
-        egfr_mask |= (maf["Hugo_Symbol"] == "EGFR") & egfr_mask
+    chrom = maf["Chromosome"].astype(str) if "Chromosome" in maf.columns else pd.Series("", index=maf.index)
+    pos = pd.to_numeric(maf["Start_Position"], errors="coerce") if "Start_Position" in maf.columns else pd.Series(0, index=maf.index)
 
-    # Also by genomic position
-    if "Chromosome" in maf.columns and "Start_Position" in maf.columns:
-        kras_pos_mask = (
-            (maf["Chromosome"].astype(str).isin(["12","chr12"])) &
-            (pd.to_numeric(maf["Start_Position"], errors="coerce").between(25245350, 25245352))
-        )
-        egfr_pos_mask = (
-            (maf["Chromosome"].astype(str).isin(["7","chr7"])) &
-            (pd.to_numeric(maf["Start_Position"], errors="coerce").between(55191820, 55191824))
-        )
-        kras_mask |= kras_pos_mask
-        egfr_mask |= egfr_pos_mask
+    alt = maf["Tumor_Seq_Allele2"].fillna("") if "Tumor_Seq_Allele2" in maf.columns else pd.Series("", index=maf.index)
+    kras_pos = is_kras & chrom.isin(["12", "chr12"]) & (pos == 25245351) & (alt == "A")
+    egfr_pos = is_egfr & chrom.isin(["7", "chr7"]) & (pos == 55191822) & (alt == "G")
+
+    kras_mask = kras_prot | kras_pos
+    egfr_mask = egfr_prot | egfr_pos
 
     kras_pts = set(maf.loc[kras_mask, "Tumor_Sample_Barcode"].dropna().unique())
     egfr_pts = set(maf.loc[egfr_mask, "Tumor_Sample_Barcode"].dropna().unique())
