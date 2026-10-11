@@ -1,0 +1,39 @@
+{
+  "cohort": "TCGA-LUAD",
+  "total_snvs_analyzed": 60122,
+  "substitution_spectrum": {
+    "counts": {
+      "C>A": 25532,
+      "C>T": 15023,
+      "C>G": 7940,
+      "T>A": 5681,
+      "T>C": 4471,
+      "T>G": 1475
+    },
+    "proportions": {
+      "C>A": 0.4247,
+      "C>G": 0.1321,
+      "C>T": 0.2499,
+      "T>A": 0.0945,
+      "T>C": 0.0744,
+      "T>G": 0.0245
+    }
+  },
+  "cosmic_signature_similarities": {
+    "SBS4_Smoking": 0.9938,
+    "SBS2_APOBEC": 0.5734,
+    "SBS1_Aging": 0.5117,
+    "SBS5_ClockLike": 0.8941
+  },
+  "smoking_signature_dominant_patients": 169,
+  "total_patients": 198,
+  "median_estimated_purity": 0.597,
+  "clonality_comparison": {
+    "raw_vaf_clonal_pct": 13.8,
+    "purity_corrected_clonal_pct": 39.95
+  },
+  "target_drivers_median_ccf": {
+    "kras_g12c": 1.0,
+    "egfr_l858r": 1.0
+  }
+}
