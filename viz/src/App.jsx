@@ -1,8 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import triageVariantsData from './data/triage_variants.json'
-import cohortSummaryData from './data/cohort_summary.json'
-import dataQualityData from './data/data_quality.json'
-import modelTransparencyData from './data/model_transparency.json'
+import { triageVariantsData, cohortSummaryData, dataQualityData, modelTransparencyData, dataMissing } from './data'
 import './App.css'
 
 export default function App() {
@@ -192,6 +189,12 @@ export default function App() {
         </span>
         <span className="banner-tag">Research Use Only (RUO)</span>
       </div>
+
+      {dataMissing && (
+        <div style={{ background: '#7a4b00', color: '#fff', padding: '8px 16px', fontSize: 13 }}>
+          Dashboard data files not found in src/data/ - showing empty placeholders. Run scripts/build_dashboard_data.py.
+        </div>
+      )}
 
       {/* HEADER & NAV */}
       <header className="dashboard-header">

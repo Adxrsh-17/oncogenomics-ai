@@ -7,7 +7,7 @@ Runs Mutect2 + FilterMutectCalls + VEP REST on the result.
 import json, os, subprocess, sys, time, random
 from pathlib import Path
 
-WORK    = Path("/opt/ml/input/data/notebook/oncoseq")
+WORK    = Path(os.environ.get("ONCOSEQ_WORK", "/opt/ml/input/data/notebook/oncoseq"))
 REF_FA  = WORK / "ref" / "GRCh38_chr17.fa"
 BAM_DIR = WORK / "bams"
 VCF_DIR = WORK / "vcfs"
@@ -16,9 +16,9 @@ GATK    = WORK / "gatk" / "gatk.jar"
 JAVA    = "java"
 MAF_FILE = WORK / "mafs" / "tcga_luad_full_merged.maf"
 
-BAM_DIR.mkdir(exist_ok=True)
-VCF_DIR.mkdir(exist_ok=True)
-RES_DIR.mkdir(exist_ok=True)
+BAM_DIR.mkdir(parents=True, exist_ok=True)
+VCF_DIR.mkdir(parents=True, exist_ok=True)
+RES_DIR.mkdir(parents=True, exist_ok=True)
 
 LOG = RES_DIR / "benchmark_realref.log"
 
@@ -32,11 +32,11 @@ def log(msg):
 # Known chr17 cancer gene regions (based on hg38)
 BENCHMARK_REGIONS = [
     # (name, chrom_in_ref, start, end, key_mut_pos, ref_base, alt_base)
-    ("TP53",   "chr17", 7565000,  7615000,  7577534, "C", "T"),   # R175H
+    ("TP53",   "chr17", 7565000,  7615000,  7577534, "C", "T"),   # R175H; NOTE region/pos are hg19 coords, not GRCh38 (TP53 GRCh38 ~chr17:7.67M) - verify before claiming gene-level recall
     ("BRCA1",  "chr17", 43044000, 43094000, 43063929, "G", "A"),  # common frameshift region
     ("NF1",    "chr17", 31050000, 31100000, 31094050, "C", "T"),  # common truncating
-    ("ERBB2",  "chr17", 37840000, 37890000, 37880981, "A", "G"),  # V777L activating
-    ("CDH1",   "chr17", 39656000, 39706000, 39689718, "T", "A"),  # splice site
+    ("ERBB2",  "chr17", 37840000, 37890000, 37880981, "A", "G"),  # V777L; NOTE hg19-style coords, ERBB2 GRCh38 is ~chr17:39.7M - verify
+    # CDH1 removed: gene is on chr16, not chr17 (region was arbitrary).
 ]
 
 def get_ref_sequence(fa_path, chrom, start, end):
@@ -154,7 +154,7 @@ def run_mutect2(ref_fa, tumor_bam, normal_bam, region, vcf_out):
         "--verbosity", "ERROR",
         "--native-pair-hmm-threads", "4",
     ]
-    (VCF_DIR / "tmp").mkdir(exist_ok=True)
+    (VCF_DIR / "tmp").mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
     elapsed = time.time() - t0
@@ -346,7 +346,7 @@ def main():
                 mean_af = round(sum(afs)/len(afs), 4) if afs else None
                 # Check if key mutation detected
                 for v in variants:
-                    if abs(v["pos"] - key_pos) <= 5:
+                    if v["pos"] == key_pos and v["alt"] == alt_b:
                         detected_key = True
                 all_variants.extend(variants)
                 log(f"  PASS variants: {n_pass}, key mut detected: {detected_key}, mean_AF: {mean_af}")

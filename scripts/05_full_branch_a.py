@@ -9,9 +9,10 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 
-MAF_FULL = Path("/opt/ml/input/data/notebook/oncoseq/mafs/tcga_luad_full_merged.maf")
-OUT_DIR  = Path("/opt/ml/input/data/notebook/oncoseq/results")
-OUT_DIR.mkdir(exist_ok=True)
+import os
+MAF_FULL = Path(os.environ.get("ONCOSEQ_MAF", "/opt/ml/input/data/notebook/oncoseq/mafs/tcga_luad_full_merged.maf"))
+OUT_DIR  = Path(os.environ.get("ONCOSEQ_OUT", "/opt/ml/input/data/notebook/oncoseq/results"))
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 GNOMAD_MAX_AF_THRESH = 0.001
 
@@ -32,31 +33,11 @@ DRUG_MAP = {
 }
 
 def identify_targets(maf):
-    """Find KRAS G12C and EGFR L858R patients."""
-    kras_mask = pd.Series([False]*len(maf), index=maf.index)
-    egfr_mask = pd.Series([False]*len(maf), index=maf.index)
-
-    if "HGVSp_Short" in maf.columns:
-        kras_mask |= maf["HGVSp_Short"].fillna("").str.contains("G12C")
-        egfr_mask |= maf["HGVSp_Short"].fillna("").str.contains("L858R")
-
-    if "Hugo_Symbol" in maf.columns and "Chromosome" in maf.columns:
-        kras_mask |= (maf["Hugo_Symbol"] == "KRAS") & kras_mask
-        egfr_mask |= (maf["Hugo_Symbol"] == "EGFR") & egfr_mask
-
-    # Also by genomic position
-    if "Chromosome" in maf.columns and "Start_Position" in maf.columns:
-        kras_pos_mask = (
-            (maf["Chromosome"].astype(str).isin(["12","chr12"])) &
-            (pd.to_numeric(maf["Start_Position"], errors="coerce").between(25245350, 25245352))
-        )
-        egfr_pos_mask = (
-            (maf["Chromosome"].astype(str).isin(["7","chr7"])) &
-            (pd.to_numeric(maf["Start_Position"], errors="coerce").between(55191820, 55191824))
-        )
-        kras_mask |= kras_pos_mask
-        egfr_mask |= egfr_pos_mask
-
+    """Find KRAS G12C and EGFR L858R patients (exact gene + exact protein change)."""
+    hgvs = maf["HGVSp_Short"].fillna("")
+    gene = maf["Hugo_Symbol"]
+    kras_mask = (gene == "KRAS") & (hgvs == "p.G12C")
+    egfr_mask = (gene == "EGFR") & (hgvs == "p.L858R")
     kras_pts = set(maf.loc[kras_mask, "Tumor_Sample_Barcode"].dropna().unique())
     egfr_pts = set(maf.loc[egfr_mask, "Tumor_Sample_Barcode"].dropna().unique())
     return kras_pts, egfr_pts
@@ -130,9 +111,9 @@ def main():
         b = int(burden.get(pt, 0))
         is_kras = pt in kras_pts
         is_egfr = pt in egfr_pts
-        drug = "Sotorasib" if is_kras else "Osimertinib"
-        variant = "KRAS p.G12C" if is_kras else "EGFR p.L858R"
-        trial = "CodeBreaK 100 (37.1% RR)" if is_kras else "FLAURA (80% RR)"
+        drug = " + ".join(d for d, f in (("Sotorasib", is_kras), ("Osimertinib", is_egfr)) if f)
+        variant = " + ".join(v for v, f in (("KRAS p.G12C", is_kras), ("EGFR p.L858R", is_egfr)) if f)
+        trial = " + ".join(t for t, f in (("CodeBreaK 100 (37.1% RR)", is_kras), ("FLAURA (80% RR)", is_egfr)) if f)
         reports.append({
             "patient": pt, "variant": variant, "drug": drug,
             "trial": trial, "mutation_burden": b,

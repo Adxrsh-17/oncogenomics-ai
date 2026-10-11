@@ -7,14 +7,14 @@ Measures: CPU wall-clock per region, recall vs known hotspots, VAF accuracy.
 import json, os, subprocess, sys, time
 from pathlib import Path
 
-WORK    = Path("/opt/ml/input/data/notebook/oncoseq")
+WORK    = Path(os.environ.get("ONCOSEQ_WORK", "/opt/ml/input/data/notebook/oncoseq"))
 GATK    = WORK / "gatk" / "gatk.jar"
 BAM_DIR = WORK / "bams"
 REF_DIR = WORK / "ref"
 VCF_DIR = WORK / "vcfs"
 RES_DIR = WORK / "results"
-VCF_DIR.mkdir(exist_ok=True)
-RES_DIR.mkdir(exist_ok=True)
+VCF_DIR.mkdir(parents=True, exist_ok=True)
+RES_DIR.mkdir(parents=True, exist_ok=True)
 
 JAVA = "java"
 LOG = RES_DIR / "benchmark_real.log"
@@ -61,7 +61,7 @@ def run_mutect2(tumor_bam, normal_bam, ref_fa, region, vcf_out):
         "--tmp-dir", str(VCF_DIR / "tmp"),
         "--verbosity", "ERROR",
     ]
-    (VCF_DIR / "tmp").mkdir(exist_ok=True)
+    (VCF_DIR / "tmp").mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
     elapsed = time.time() - t0
