@@ -1,0 +1,31 @@
+{
+  "pipeline_branch_linkage": {
+    "branch_a": "TCGA-LUAD Cohort Analysis & Target Selection (N=198, Target=29)",
+    "branch_b": "Tumor-Normal BAM Somatic Calling & GPU Acceleration",
+    "linking_key": "TCGA Case ID (cases.submitter_id) and Tumor_Sample_Barcode"
+  },
+  "target_cohort": {
+    "total_actionable_patients": 29,
+    "kras_g12c_patients": 21,
+    "egfr_l858r_patients": 8
+  },
+  "pilot_protocol": {
+    "stage": "Single-Pair Pilot Protocol (Complete)",
+    "pilot_sample": "HCC1143 / HCC1143BL (Tumor-Normal Paired Breast Carcinoma Cell Line)",
+    "rationale": "Publicly accessible reference pair from Broad Institute / GATK somatic tutorial data (chr17 subset) used to validate the end-to-end Mutect2 + FilterMutectCalls + VEP pipeline without requiring dbGaP controlled-access credentials.",
+    "synthetic_pilot": "GRCh38 realistic spike-in paired BAMs (KRAS and EGFR at 5 VAF tiers) used to measure recall, VAF agreement, and low-VAF sensitivity curve."
+  },
+  "dbgap_access_protocol": {
+    "status": "Documented dbGaP Controlled-Access Blocker & Workflow",
+    "dbgap_study_accession": "phs000178.v11.p8 (The Cancer Genome Atlas - TCGA)",
+    "dataset_name": "TCGA-LUAD Whole Exome / Genome Sequencing BAMs",
+    "access_requirements": [
+      "NIH eRA Commons account credentials",
+      "Formal Data Access Request (DAR) submitted via dbGaP system",
+      "Institutional Review Board (IRB) or Data Access Committee (DAC) approval",
+      "Data Use Certification (DUC) agreement signed by Institutional Signing Official (SO)",
+      "GDC User Token generated from https://portal.gdc.cancer.gov"
+    ],
+    "execution_command": "gdc-client download -m tcga_target_29_bams_manifest.txt -t <user_gdc_token.txt> -d ./raw_bams/"
+  }
+}
