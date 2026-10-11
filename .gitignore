@@ -10,3 +10,7 @@ results/tcga_luad_merged.maf
 results/luad_maf.tar.gz
 results/maf_files/
 results/ml_prioritizer_scores.csv
+results/dashboard/
+viz/src/data/
+data/
+scratch/
