@@ -255,9 +255,78 @@ Since clinical and hotspot databases are frequently updated and subject to licen
 6. **Per-variant Score Files:** Intermediate score files like `results/ml_prioritizer_scores.csv` are tracked in `.gitignore` due to size and should be regenerated locally using `scripts/04_ml_prioritizer.py`.
 ---
 
+---
+
+## Dashboard (OncoSeq Triage Dashboard v2)
+
+The interactive web dashboard is located in `viz/` and engineered to assist both clinical molecular tumour boards and bioinformatics researchers in decision-making and data quality auditing.
+
+### 1. How to Build the Data
+All aggregates, evidence checklists, and triage tables are precomputed into lightweight JSON files (< 3.5 MB total) so the dashboard never loads the 100 MB MAF into memory or the browser:
+
+```bash
+# Run data precomputation (memory-safe streaming, chunked processing)
+python scripts/build_dashboard_data.py
+```
+This script reads `results/tcga_luad_merged.maf`, `results/ml_prioritizer_scores.csv`, `data/hotspots.csv`, and `data/oncokb_cancer_gene_list.txt`, generating clean JSON artifacts in `results/dashboard/` and syncing them to `viz/src/data/`:
+- `triage_variants.json`: Pre-sorted, prioritized variant table with evidence fields and plain-language triage summaries.
+- `cohort_summary.json`: Observed alteration frequencies of key lung cancer genes, 7 pathways, and 6-class SBS mutation spectrum.
+- `data_quality.json`: Caller concordance breakdown (3 callers vs 2 callers), gnomAD missing rates, and annotation coverage.
+- `model_transparency.json`: Exact cross-validation metrics, baseline comparisons, and feature importance.
+
+### 2. How to Run the Dashboard Locally
+The dashboard runs as a single lightweight Node/Vite process without GPU requirements:
+
+```bash
+cd viz
+npm install
+npm run dev
+```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+To compile a static production build:
+```bash
+npm run build
+```
+
+### 3. What Each View is For
+
+1. **Variant Triage Table (Main Page):**
+   - **Target User:** Molecular Tumour Board (MTB) / Oncologist / Clinical Researcher.
+   - **Question Answered:** *"Which variants in this cohort or patient are worth attention, and why?"*
+   - **Features:** One row per variant with Gene, Protein Change, Consequence, VAF, Depth, CancerHotspot status, OncoKB/CGC Gene Tier, SIFT/PolyPhen, gnomAD AF, Caller Count, COSMIC flag, and ML Hotspot-likeness score. Filterable (gene, tier, hotspot only, consequence, VAF slider), sortable, searchable, paginated (50 rows/page), and exportable to CSV. Default sort prioritizes hotspots, Tier 1/2 genes, and high-consensus variants first.
+2. **Variant Detail Panel (Slide-Over Drawer):**
+   - **Target User:** Clinical geneticist / MTB review.
+   - **Question Answered:** *"What is the exact biological and technical evidence supporting this flagged variant?"*
+   - **Features:** Triggered on row click. Displays a one-line plain-language *"Why flagged"* rationale built strictly from verified data fields, followed by an evidence checklist (Hotspot Y/N, Gene List Membership, Population Frequency, Functional Prediction, Multi-Caller Agreement, Cohort Recurrence). Explicitly clarifies that therapeutic levels require OncoKB institutional licensing.
+3. **Cohort Summary:**
+   - **Target User:** Cancer biologist / Epidemiologist.
+   - **Question Answered:** *"What is the background mutational landscape and key driver prevalence in this cohort?"*
+   - **Features:** Displays observed alteration frequencies for key lung-cancer drivers (TP53 50.8%, KRAS 29.4%, KEAP1 18.2%, EGFR 14.4%, STK11 12.3%, BRAF 9.1%, ERBB2 3.7%), patient frequencies across 7 canonical oncogenic pathways, and the 6-class SBS mutation spectrum confirming dominant tobacco smoking etiology (C>A transversions 42.5%, SBS4 cosine similarity 0.9938).
+4. **Data Quality & Trust Panel:**
+   - **Target User:** Bioinformatician / Quality Assurance.
+   - **Question Answered:** *"How reliable are these calls and annotations?"*
+   - **Features:** Reports multi-caller concordance (80.11% verified by 3 algorithms, 19.89% by 2 algorithms; 0% single-caller calls), gnomAD germline filter results (3 variants filtered with AF > 0.001; 86.48% missingness explained by somatic rarity), and SIFT/PolyPhen annotation coverage (64.3% coverage; 35.7% unannotated due to missense-only design).
+5. **Model Transparency Panel:**
+   - **Target User:** Bioinformatician / ML Auditor.
+   - **Question Answered:** *"What is the machine learning model actually adding over gene priors?"*
+   - **Features:** Reports honest metrics from `results/final_metrics.json` (Pooled PR-AUC 0.258 ± 0.024, range 0.170–0.285, random baseline 0.004, `driver_tier`-only baseline 0.092). Displays ablation benchmarks, feature importance (driver_tier 42.1%, polyphen 17.1%, depth 10.8%, vaf 10.1%), and a clear plain-language disclaimer that the score reflects hotspot-likeness driven by gene priors, not clinical driver status or treatment response.
+
+### 4. Known Limitations
+
+- **Research Prototype Only:** Not a clinical diagnostic tool. Not intended for direct treatment decisions or drug selection.
+- **Hotspot-Likeness vs Driver Status:** The ML model predicts hotspot-likeness (similarity to CancerHotspots.org positions), not de novo tumorigenic drivers or drug response. Truncating variants in tumour suppressors are often true drivers without being hotspots.
+- **Gene Prior Dominance:** Over 42% of the Random Forest decision weight comes from the `driver_tier` prior. While biological features provide a lift from 0.092 to 0.258 PR-AUC, the model heavily leverages existing oncology knowledge.
+- **No Direct Therapeutic Prescriptions:** Therapeutic evidence levels (OncoKB Levels 1–4) and drug assignments are not embedded; clinical guidance requires institutional OncoKB access.
+- **Population Database Missingness:** gnomAD missingness is 86.48% because somatic tumor mutations are rarely cataloged in population germline databases.
+- **Missense Restriction:** SIFT and PolyPhen scores are available only for missense substitutions (~64.3% of the cohort).
+
+---
+
 ## Citations & Licensing
 
 - **OncoKB:** Used for defining `driver_tier`. OncoKB is a proprietary database (Memorial Sloan Kettering Cancer Center). The static gene list is freely available via the API, but full annotation requires a license. Free for academic use only.
 - **COSMIC:** The Cancer Gene Census flag used in `driver_tier` and `in_cosmic` is subject to the restrictive COSMIC license (Sanger Institute). Commercial use requires a paid license. We did not independently scrape COSMIC.
 - **CancerHotspots:** Sourced from `CancerHotspots.org` (v2, MSKCC).
+
 
