@@ -29,9 +29,11 @@ def log(msg):
     with open(LOG, "a") as f:
         f.write(line + "\n")
 
-# Known chr17 cancer gene regions (based on hg38)
+# Known cancer gene regions and clinical target regions (based on GRCh38 / hg38)
 BENCHMARK_REGIONS = [
     # (name, chrom_in_ref, start, end, key_mut_pos, ref_base, alt_base)
+    ("KRAS",   "chr12", 25220000, 25270000, 25245351, "C", "A"),  # G12C activating (c.34G>T / p.G12C)
+    ("EGFR",   "chr7",  55170000, 55220000, 55191822, "T", "G"),  # L858R activating (c.2573T>G / p.L858R)
     ("TP53",   "chr17", 7565000,  7615000,  7577534, "C", "T"),   # R175H
     ("BRCA1",  "chr17", 43044000, 43094000, 43063929, "G", "A"),  # common frameshift region
     ("NF1",    "chr17", 31050000, 31100000, 31094050, "C", "T"),  # common truncating
@@ -311,8 +313,16 @@ def main():
 
     for gene, chrom_r, reg_start, reg_end, key_pos, ref_b, alt_b in BENCHMARK_REGIONS:
         log(f"\n--- {gene}: {chrom_r}:{reg_start:,}-{reg_end:,} ---")
-
-        seq = get_ref_sequence(REF_FA, chrom_r, reg_start, reg_end)
+        gene_ref = WORK / "ref" / f"GRCh38_{chrom_r}.fa"
+        target_ref = gene_ref if gene_ref.exists() else REF_FA
+        if not target_ref.exists():
+            log(f"  Reference for {chrom_r} not found at {target_ref}, skipping region.")
+            continue
+        try:
+            seq = get_ref_sequence(target_ref, chrom_r, reg_start, reg_end)
+        except Exception as e:
+            log(f"  Error extracting sequence from {target_ref}: {e}")
+            continue
         region_len = len(seq)
         log(f"  Sequence length: {region_len} bp")
 
