@@ -236,12 +236,32 @@ def vep_annotate(variants, out_csv):
                     gene = tc.get("gene_symbol", "")
                 v["gene"] = gene
                 v["consequence"] = consequence
+                # Structured ClinVar extraction
+                clinvar_sig = "Unannotated"
+                for cv in hit.get("colocated_variants", []):
+                    for sig in cv.get("clin_sig", []):
+                        sig_lower = str(sig).lower()
+                        if "pathogenic" in sig_lower and "likely" not in sig_lower:
+                            clinvar_sig = "Pathogenic"
+                            break
+                        elif "likely_pathogenic" in sig_lower:
+                            clinvar_sig = "Likely Pathogenic"
+                            break
+                        elif "uncertain" in sig_lower:
+                            clinvar_sig = "VUS"
+                        elif "benign" in sig_lower:
+                            clinvar_sig = "Benign"
+                    if clinvar_sig != "Unannotated":
+                        break
+                v["clinvar_pathogenicity"] = clinvar_sig
             else:
                 v["gene"] = "N/A"
                 v["consequence"] = "N/A"
+                v["clinvar_pathogenicity"] = "N/A"
         except Exception:
             v["gene"] = "N/A"
             v["consequence"] = "N/A"
+            v["clinvar_pathogenicity"] = "N/A"
         annotated.append(v)
 
     df = pd.DataFrame(annotated)
