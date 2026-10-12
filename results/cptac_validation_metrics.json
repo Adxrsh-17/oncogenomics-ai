@@ -1,0 +1,11 @@
+{
+  "dataset": "CPTAC-3 LUAD",
+  "n_variants": 116474,
+  "n_positives": 438,
+  "baseline_pr_auc": 0.00376,
+  "pr_auc_external": 0.8117,
+  "auc_roc_external": 0.993,
+  "lift_over_random": 215.8,
+  "tcga_internal_pr_auc": 0.258,
+  "note": "CPTAC-3 and TCGA share no patients. CPTAC MAF uses Illumina WGS, TCGA used WXS \u2014 coverage differences may affect recall."
+}

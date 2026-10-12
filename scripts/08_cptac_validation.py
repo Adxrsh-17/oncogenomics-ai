@@ -47,18 +47,17 @@ def fetch_cptac_maf_ids():
     filters = {
         "op": "and",
         "content": [
-            {"op": "=",  "content": {"field": "cases.project.project_id", "value": "CPTAC-3"}},
-            {"op": "in", "content": {"field": "cases.disease_type",
-                                     "value": ["Adenocarcinomas", "Lung Adenocarcinoma"]}},
-            {"op": "=",  "content": {"field": "data_type", "value": "Masked Somatic Mutation"}},
-            {"op": "=",  "content": {"field": "access", "value": "open"}},
+            {"op": "=", "content": {"field": "cases.project.project_id", "value": "CPTAC-3"}},
+            {"op": "=", "content": {"field": "cases.primary_site", "value": "Bronchus and lung"}},
+            {"op": "=", "content": {"field": "data_type", "value": "Masked Somatic Mutation"}},
+            {"op": "=", "content": {"field": "access", "value": "open"}},
         ]
     }
     params = {
         "filters": json.dumps(filters),
-        "fields": "file_id,file_name,file_size,cases.disease_type",
+        "fields": "file_id,file_name,file_size",
         "format": "json",
-        "size": "50",
+        "size": "400",
     }
     r = requests.get(GDC_FILES, params=params, timeout=30)
     r.raise_for_status()
@@ -181,18 +180,17 @@ def validate(maf_df, model_path, data_dir):
     rf       = bundle["rf"]
     features = bundle["features"]
 
-    # Import build_feature_matrix from 04_ml_prioritizer without running main()
-    import importlib.util, types
-    spec = importlib.util.spec_from_file_location(
-        "ml_prioritizer",
-        Path(__file__).resolve().parent / "04_ml_prioritizer.py"
-    )
+    # Import build_feature_matrix from 04_ml_prioritizer
+    # The module already has `if __name__ == "__main__": main()` guard so main() won't run
+    import importlib.util, sys as _sys
+    _mod_path = Path(__file__).resolve().parent / "04_ml_prioritizer.py"
+    spec = importlib.util.spec_from_file_location("ml_prioritizer", _mod_path)
+    assert spec is not None and spec.loader is not None
     mod = importlib.util.module_from_spec(spec)
-    # Prevent main() from running during import
-    mod.__name__ = "ml_prioritizer_import"
-    spec.loader.exec_module(mod)  # type: ignore
+    _sys.modules["ml_prioritizer"] = mod
+    spec.loader.exec_module(mod)  # type: ignore[union-attr]
 
-    df, feat_cols, gene_col = mod.build_feature_matrix(maf_df)
+    df, _feat_cols, _gene_col = mod.build_feature_matrix(maf_df)
 
     # Align feature columns — fill any missing with 0
     for f in features:
@@ -269,9 +267,4 @@ def main():
 
 
 if __name__ == "__main__":
-    for pkg in ["requests", "scikit-learn", "joblib"]:
-        try:
-            __import__(pkg.replace("-", "_"))
-        except ImportError:
-            subprocess.run([sys.executable, "-m", "pip", "install", pkg, "-q"], check=True)
     main()
