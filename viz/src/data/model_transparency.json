@@ -1,0 +1,66 @@
+{
+  "pooled_pr_auc_mean": 0.257,
+  "ci_95": 0.024,
+  "pr_auc_min": 0.168,
+  "pr_auc_max": 0.28,
+  "repeats": 10,
+  "positives": 248,
+  "total_evaluated": 62143,
+  "baseline_pr_auc": 0.004,
+  "enrichment_factor": "65x above random",
+  "baselines_comparison": [
+    {
+      "model": "Random Baseline (Prevalence)",
+      "pr_auc": 0.004,
+      "notes": "Expected chance performance (248/62,143)"
+    },
+    {
+      "model": "driver_tier Prior Only",
+      "pr_auc": 0.092,
+      "notes": "Gene-level membership prior (OncoKB/CGC)"
+    },
+    {
+      "model": "No COSMIC / driver_tier",
+      "pr_auc": 0.081,
+      "notes": "Pure sequencing & in silico features without gene priors"
+    },
+    {
+      "model": "Full Gene-Grouped Model",
+      "pr_auc": 0.258,
+      "notes": "Pooled out-of-fold cross-validation across 10 repeats"
+    }
+  ],
+  "feature_importance_rf": {
+    "vaf": 0.1033,
+    "depth": 0.1093,
+    "driver_tier": 0.4116,
+    "consequence_score": 0.032,
+    "clonality_score": 0.0162,
+    "is_snv": 0.0092,
+    "pop_af": 0.0117,
+    "sift_score": 0.0562,
+    "polyphen_score": 0.1575,
+    "caller_count": 0.0065,
+    "in_cosmic": 0.0864
+  },
+  "feature_importance_xgb": {
+    "vaf": 0.1847,
+    "depth": 0.2475,
+    "driver_tier": 0.1363,
+    "consequence_score": 0.0465,
+    "clonality_score": 0.0,
+    "is_snv": 0.0219,
+    "pop_af": 0.0213,
+    "sift_score": 0.0491,
+    "polyphen_score": 0.219,
+    "caller_count": 0.0002,
+    "in_cosmic": 0.0735
+  },
+  "clinvar_validation": {
+    "sample_size": 243,
+    "roc_auc": 0.9554,
+    "pr_auc": 0.9973
+  },
+  "plain_language_disclaimer": "The ML model outputs a hotspot-likeness score reflecting similarity to recurrent somatic positions cataloged in CancerHotspots.org. It is heavily driven by gene-level priors (driver_tier: 42.1% RF importance) and functional impact predictions, rather than novel mutation-level physics. It is NOT a clinical driver probability and does NOT indicate therapeutic efficacy.",
+  "mandatory_banner": "Research prototype on TCGA-LUAD data. Not a clinical diagnostic tool. Not for treatment decisions."
+}
