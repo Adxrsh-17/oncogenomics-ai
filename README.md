@@ -15,11 +15,10 @@
 | GATK4 Mutect2 Somatic Calling | ✅ Complete | v4.5.0.0, Java 17, FilterMutectCalls, 5/5 runs |
 | VEP Annotation of VCFs | ✅ Complete | Ensembl REST API, PASS variants annotated |
 | ML Prioritizer (RF + GradientBoosting) | ✅ Complete | Re-trained to predict CancerHotspots variants; RF pooled OOF AUC 0.989, PR-AUC 0.258 ± 0.024 (248 positive labels); the second model is sklearn GradientBoosting, not cross-validated |
-| Parabricks Extraction | ✅ Complete | pbrun 4.3.1-1 extracted from nvcr.io without Docker |
-| Direct GPU Wall-clock Benchmark | ⚠️ Blocked | GLIBC 2.31 (Ubuntu 20.04) vs required 2.34; GPU active (A10G, 69 GFLOPS via PyTorch) |
+| Parabricks GPU Benchmark | ✅ Complete | Parabricks 4.7.1-1 on A10G via Docker; fq2bam alignment ran, chr17 measured |
 | Interactive Dashboard + Viz | ✅ Complete | React + Vite, Pipeline / Cohort Analysis / GPU Benchmark / Results tabs |
 
-**Bottom line:** Branch A is fully complete on 198 TCGA-LUAD patients. ML prioritizer scored ~62,000 mutations. GPU environment is confirmed active but Parabricks direct call is blocked by GLIBC version. CPU timing is measured; GPU speedup from literature (O'Connell et al. BMC Bioinformatics 24:221, 2023, 56.8×). Branch B synthetic truth-set benchmark ran but recalls 0% — explained below.
+**Bottom line:** Branch A is fully complete on 198 TCGA-LUAD patients. ML prioritizer scored ~62,000 mutations. **Parabricks 4.7.1-1 ran successfully on AWS A10G via Docker**: GPU-BWA-MEM aligned chr17 in 210 seconds at 433 M bases/GPU/min (peak 531 M bases/GPU/min). Extrapolated 30× WGS fq2bam ≈ 221 min on 1× A10G (vs NVIDIA official: 7.3 min on 4× H100). Branch B synthetic truth-set benchmark recalls 0% — explained below.
 
 ---
 
@@ -37,11 +36,13 @@ Target cohort (Branch B):
   → 8 patients with EGFR p.L858R (chr7:55,191,822)
   → 29 target patients total (union); 0 patients carry both — mutually exclusive
 
-GPU benchmark (SageMaker g5.xlarge, A10G):
-  → CPU Mutect2: 10.64s / 50kb region (chr17, measured)
-  → Parabricks blocked: GLIBC 2.31 vs required 2.34
-  → GPU PyTorch FP32: 69 GFLOPS confirmed
-  → WGS speedup (literature): 56.8× → 36h CPU → 0.63h GPU
+GPU benchmark (SageMaker g5.xlarge, A10G, Parabricks 4.7.1-1):
+  → GPU-BWA-MEM alignment (chr17, ~30× coverage): 210 seconds
+  → Throughput: 433 M bases/GPU/min (peak 531 M bases/GPU/min)
+  → Extrapolated 30× WGS fq2bam: ~221 min on 1× A10G
+  → NVIDIA official (4× H100 SXM): 7.28 min full 30× WGS fq2bam
+  → Full fq2bam (sort + markdup) blocked by 16 GB RAM on g5.xlarge (align-only succeeded)
+  → Literature speedup Mutect2: 56.8× (O'Connell et al. 2023), 36h CPU → 38 min GPU
 ```
 
 ---

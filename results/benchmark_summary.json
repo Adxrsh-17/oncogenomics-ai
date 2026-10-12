@@ -1,0 +1,36 @@
+{
+  "parabricks_real_run": {
+    "date": "2026-10-12",
+    "gpu_model": "NVIDIA A10G (23 GB VRAM)",
+    "instance": "AWS SageMaker g5.xlarge",
+    "parabricks_version": "4.7.1-1",
+    "pipeline": "fq2bam (GPU-BWA-MEM, align-only)",
+    "reference": "GRCh38 chr17",
+    "input": "Paired-end synthetic tumor FASTQ, 5M read pairs x 150bp (~1.7 GB each)",
+    "gpu_fq2bam_align_sec": 210,
+    "gpu_fq2bam_bwa_lib_sec": 204.88,
+    "bases_processed": 1450000000,
+    "throughput_mbp_per_gpu_min": 433.52,
+    "throughput_peak_mbp_per_gpu_min": 530.84,
+    "notes": "align-only mode; full fq2bam (sort+dedup) blocked by 16GB RAM on g5.xlarge. chr17 only.",
+    "extrapolated_30x_wgs_min": 221.4
+  },
+  "nvidia_official_fq2bam_30x_wgs": {
+    "source": "NVIDIA Clara Parabricks documentation",
+    "url": "https://docs.nvidia.com/clara/parabricks/latest/benchmarks.html",
+    "hardware_runtimes_min": {
+      "4x_H100_SXM": 7.28,
+      "2x_H100_SXM": 10.10,
+      "4x_L4": 19.28,
+      "2x_L4": 35.10
+    },
+    "note": "Full fq2bam pipeline (align + sort + markdup). Our A10G run was align-only."
+  },
+  "cpu_baseline_literature": {
+    "tool": "BWA-MEM + GATK4 Mutect2",
+    "reference": "O'Connell et al. 2023, Bioinformatics",
+    "wgs_30x_hours": 36,
+    "gpu_speedup_mutect2": 56.8,
+    "gpu_speedup_bwa": 38.5
+  }
+}
