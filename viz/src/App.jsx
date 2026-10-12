@@ -1,15 +1,16 @@
 import React, { useState, useMemo } from 'react'
 import { triageVariantsData, cohortSummaryData, dataQualityData, modelTransparencyData, dataMissing } from './data'
+import DemoTab from './DemoTab'
 import './App.css'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.replace('#', '')
-      if (['cohort', 'quality', 'model'].includes(hash)) return hash
+      if (['triage', 'cohort', 'quality', 'model', 'demo'].includes(hash)) return hash
       const params = new URLSearchParams(window.location.search)
       const tabParam = params.get('tab')
-      if (['cohort', 'quality', 'model'].includes(tabParam)) return tabParam
+      if (['triage', 'cohort', 'quality', 'model', 'demo'].includes(tabParam)) return tabParam
     }
     return 'triage'
   })
@@ -234,6 +235,13 @@ export default function App() {
             id="tab-model"
           >
             <span className="nav-icon">&#9881;</span> Model Transparency
+          </button>
+          <button
+            className={`nav-tab nav-tab-demo ${activeTab === 'demo' ? 'active' : ''}`}
+            onClick={() => handleTabChange('demo')}
+            id="tab-demo"
+          >
+            <span className="nav-icon">▶</span> Live Demo
           </button>
         </nav>
       </header>
@@ -1021,6 +1029,8 @@ export default function App() {
             </div>
           </div>
         )}
+        {/* VIEW 5: LIVE DEMO */}
+        {activeTab === 'demo' && <DemoTab />}
       </main>
 
       {/* DASHBOARD FOOTER */}
