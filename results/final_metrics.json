@@ -1,12 +1,15 @@
 {
-    "pooled_pr_auc_mean": 0.2568184352879418,
-    "95_ci_half_width": 0.023776314306120785,
-    "min": 0.16755736332191298,
-    "max": 0.2795851663940492,
+    "pooled_pr_auc_mean": 0.5144713343155503,
+    "95_ci_half_width": 0.07716990788136961,
+    "min": 0.4801034889250241,
+    "max": 0.5405533959117516,
     "repeats": 10,
-    "positives": 248,
-    "total": 62143,
-    "baseline_pr_auc": 0.003990795423458797,
-    "pooled_auc": 0.9887333126600982,
-    "model_report": "results/ml_model_report.json"
+    "positives": 617,
+    "total": 155253,
+    "baseline_pr_auc": 0.0039741583093402385,
+    "pooled_auc": 0.9727273231632904,
+    "model_report": "results/ml_model_report.json",
+    "clonality_score_ccf_corrected": true,
+    "purity_patients_covered": 0,
+    "ccf_feature_added": true
 }
