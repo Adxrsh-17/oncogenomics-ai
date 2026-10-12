@@ -1,0 +1,137 @@
+{
+  "cohort_name": "TCGA-LUAD",
+  "total_patients": 187,
+  "total_mutations": 62146,
+  "key_lung_genes": [
+    {
+      "gene": "TP53",
+      "patients": 95,
+      "pct": 50.8,
+      "total_patients": 187,
+      "tier": 2
+    },
+    {
+      "gene": "KRAS",
+      "patients": 55,
+      "pct": 29.4,
+      "total_patients": 187,
+      "tier": 2
+    },
+    {
+      "gene": "EGFR",
+      "patients": 27,
+      "pct": 14.4,
+      "total_patients": 187,
+      "tier": 2
+    },
+    {
+      "gene": "STK11",
+      "patients": 23,
+      "pct": 12.3,
+      "total_patients": 187,
+      "tier": 2
+    },
+    {
+      "gene": "KEAP1",
+      "patients": 34,
+      "pct": 18.2,
+      "total_patients": 187,
+      "tier": 2
+    },
+    {
+      "gene": "BRAF",
+      "patients": 17,
+      "pct": 9.1,
+      "total_patients": 187,
+      "tier": 2
+    },
+    {
+      "gene": "ERBB2",
+      "patients": 7,
+      "pct": 3.7,
+      "total_patients": 187,
+      "tier": 2
+    }
+  ],
+  "top_genes": [
+    {
+      "gene": "TTN",
+      "patients": 97,
+      "pct": 51.9
+    },
+    {
+      "gene": "TP53",
+      "patients": 95,
+      "pct": 50.8
+    },
+    {
+      "gene": "MUC16",
+      "patients": 84,
+      "pct": 44.9
+    },
+    {
+      "gene": "CSMD3",
+      "patients": 78,
+      "pct": 41.7
+    },
+    {
+      "gene": "RYR2",
+      "patients": 73,
+      "pct": 39.0
+    },
+    {
+      "gene": "USH2A",
+      "patients": 68,
+      "pct": 36.4
+    },
+    {
+      "gene": "ZFHX4",
+      "patients": 66,
+      "pct": 35.3
+    },
+    {
+      "gene": "LRP1B",
+      "patients": 64,
+      "pct": 34.2
+    },
+    {
+      "gene": "KRAS",
+      "patients": 55,
+      "pct": 29.4
+    },
+    {
+      "gene": "XIRP2",
+      "patients": 53,
+      "pct": 28.3
+    },
+    {
+      "gene": "FAT3",
+      "patients": 51,
+      "pct": 27.3
+    },
+    {
+      "gene": "SPTA1",
+      "patients": 49,
+      "pct": 26.2
+    },
+    {
+      "gene": "FLG",
+      "patients": 46,
+      "pct": 24.6
+    },
+    {
+      "gene": "CSMD1",
+      "patients": 44,
+      "pct": 23.5
+    },
+    {
+      "gene": "APOB",
+      "patients": 41,
+      "pct": 21.9
+    }
+  ],
+  "pathways": [],
+  "mutation_spectrum": {},
+  "cosmic_signatures": {},
+  "data_source": "TCGA-LUAD GDC Open-Access MAF (GRCh38)"
+}

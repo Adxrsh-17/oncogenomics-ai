@@ -1,0 +1,69 @@
+{
+  "total_variants": 62146,
+  "caller_concordance": {
+    "three_callers": 49783,
+    "three_callers_pct": 80.11,
+    "two_callers": 12363,
+    "two_callers_pct": 19.89,
+    "four_callers": 0,
+    "top_combinations": [
+      {
+        "combination": "muse;mutect2;varscan2",
+        "count": 48337,
+        "pct": 77.78
+      },
+      {
+        "combination": "muse;mutect2",
+        "count": 9068,
+        "pct": 14.59
+      },
+      {
+        "combination": "muse;varscan2",
+        "count": 1728,
+        "pct": 2.78
+      },
+      {
+        "combination": "mutect2;pindel;varscan2",
+        "count": 1388,
+        "pct": 2.23
+      },
+      {
+        "combination": "mutect2;varscan2",
+        "count": 1172,
+        "pct": 1.89
+      },
+      {
+        "combination": "mutect2;pindel",
+        "count": 167,
+        "pct": 0.27
+      },
+      {
+        "combination": "pindel;varscan2",
+        "count": 156,
+        "pct": 0.25
+      },
+      {
+        "combination": "pindel;varscan2*",
+        "count": 58,
+        "pct": 0.09
+      }
+    ]
+  },
+  "gnomad_metrics": {
+    "total_variants": 62146,
+    "missing_count": 53744,
+    "missing_pct": 86.48,
+    "present_count": 8402,
+    "present_pct": 13.52,
+    "germline_filtered_count": 3,
+    "filter_threshold": 0.001,
+    "filter_explanation": "Variants with gnomAD AF > 0.001 filtered out as likely germline contamination. 86.5% missing rate is standard in somatic MAFs where rare somatic mutations are absent from population databases."
+  },
+  "functional_annotation_coverage": {
+    "sift_present": 39962,
+    "sift_pct": 64.3,
+    "polyphen_present": 40238,
+    "polyphen_pct": 64.75,
+    "unannotated_explanation": "SIFT and PolyPhen score missense variants only; non-coding, frameshift, and synonymous variants (approx 35.5% of MAF) are unannotated by design."
+  }
+}

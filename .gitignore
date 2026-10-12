@@ -11,6 +11,8 @@ results/luad_maf.tar.gz
 results/maf_files/
 results/ml_prioritizer_scores.csv
 results/dashboard/
-viz/src/data/
-data/
+/data/
+!data/file_ids.txt
+!viz/src/data/
+!viz/src/data/*
 scratch/

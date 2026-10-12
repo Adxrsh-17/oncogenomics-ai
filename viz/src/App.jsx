@@ -202,7 +202,7 @@ export default function App() {
           <div className="brand-logo">OS</div>
           <div>
             <h1 className="brand-title">OncoSeq Triage Dashboard v2</h1>
-            <p className="brand-sub">Decision Support & Analytical Transparency · TCGA-LUAD Cohort (187 patients · 62,146 variants)</p>
+            <p className="brand-sub">Decision Support & Analytical Transparency · TCGA-LUAD Cohort (187 patients · 198 tumor samples · 62,146 variants)</p>
           </div>
         </div>
 
@@ -664,7 +664,7 @@ export default function App() {
               <div className="intro-badge">Cohort Mutational Landscape</div>
               <h2>Observed alterations and mutational spectra in TCGA-LUAD</h2>
               <p>
-                Empirical summary computed directly from the cohort GDC MAF (187 patients, 62,146 somatic variants). Shows key lung cancer driver alterations, pathway frequencies, and the 6-class single-base substitution spectrum.
+                Empirical summary computed directly from the cohort GDC MAF (187 patients across 198 tumor samples, 62,146 somatic variants). Shows key lung cancer driver alterations, pathway frequencies, and the 6-class single-base substitution spectrum.
               </p>
             </div>
 
@@ -672,7 +672,7 @@ export default function App() {
             <div className="section-block">
               <h3 className="section-title">Key Lung Cancer Driver Genes (Observed Cohort Frequency)</h3>
               <p className="section-subtitle">
-                Patient alteration percentages strictly as observed in this TCGA-LUAD dataset (N = 187 patients).
+                Patient alteration percentages strictly as observed in this TCGA-LUAD dataset (N = 187 patients across 198 sequenced tumor vials; 8 patients with dual vials).
               </p>
               <div className="lung-genes-grid">
                 {cohortSummaryData.key_lung_genes.map(g => (
