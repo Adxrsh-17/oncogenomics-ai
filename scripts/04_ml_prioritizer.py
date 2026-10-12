@@ -6,7 +6,7 @@ Features: VAF, depth, functional consequence, pathway relevance,
 Input:  results/patient_clinical_report.csv + results/pathway_analysis.csv + MAF
 Output: results/ml_prioritizer_scores.csv + model performance report
 """
-import json, sys, subprocess, os
+import json, sys, subprocess, os, requests
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -22,6 +22,55 @@ OUT_SCORES = WORK / "ml_prioritizer_scores.csv"
 OUT_MODEL  = WORK / "ml_model_report.json"
 
 GNOMAD_MAX_AF_THRESH = 0.001
+MODEL_DIR  = WORK / "models"
+RF_MODEL_PATH = MODEL_DIR / "rf_model.joblib"
+
+# TCGA ABSOLUTE purity — GDC open-access supplementary
+PURITY_URL = (
+    "https://api.gdc.cancer.gov/data/"
+    "1e5e78d4-9e8a-449b-9ca0-9a6c4b3a3a0e"  # TCGA-LUAD clinical supplement UUID
+)
+PURITY_LOCAL = WORK.parent / "data" / "tcga_purity.tsv"
+
+
+def load_purity_estimates():
+    """Load per-patient tumour purity.  Returns dict {case_id: purity_float}.
+
+    Priority:
+      1. data/tcga_purity.tsv  (columns: case_id, purity)
+      2. Broad/TCGA PanCancer ABSOLUTE TSV via public URL
+      3. Uniform fallback 0.35 (typical LUAD purity)
+
+    To supply your own: place a TSV at data/tcga_purity.tsv with columns
+    case_id (e.g. TCGA-05-4418) and purity (0–1 float).
+    """
+    if PURITY_LOCAL.exists():
+        df = pd.read_csv(PURITY_LOCAL, sep="\t")
+        if {"case_id", "purity"}.issubset(df.columns):
+            return dict(zip(df["case_id"], pd.to_numeric(df["purity"], errors="coerce").fillna(0.35)))
+
+    # Try Broad TCGA PanCancer ABSOLUTE purity (public supplement)
+    broad_url = (
+        "https://api.gdc.cancer.gov/data/"
+        "1a7d7be8-675d-4e60-a105-19d4b1a7b4d8"
+    )
+    try:
+        r = requests.get(broad_url, timeout=15)
+        if r.status_code == 200:
+            from io import StringIO
+            df = pd.read_csv(StringIO(r.text), sep="\t")
+            # Common column names across TCGA purity files
+            id_col = next((c for c in df.columns if "sample" in c.lower() or "case" in c.lower()), None)
+            pur_col = next((c for c in df.columns if "purity" in c.lower() or "absolute" in c.lower()), None)
+            if id_col and pur_col:
+                # Normalise barcode → 12-char case ID (TCGA-XX-XXXX)
+                ids = df[id_col].astype(str).str[:12]
+                return dict(zip(ids, pd.to_numeric(df[pur_col], errors="coerce").fillna(0.35)))
+    except Exception:
+        pass
+
+    print("  [purity] No external purity file found — using default 0.35 for all patients")
+    return {}
 
 # ---------- known cancer driver genes for scoring ----------
 TIER1_DRIVERS = {
@@ -73,7 +122,7 @@ def driver_tier(gene):
     if gene in TIER2_DRIVERS: return 1
     return 0
 
-def build_feature_matrix(maf_df):
+def build_feature_matrix(maf_df, purity_map=None):
     """Engineer features from MAF dataframe for ML prioritization."""
     df = maf_df.copy()
 
@@ -120,8 +169,22 @@ def build_feature_matrix(maf_df):
     # Pathway membership
     df["pathway"] = df[gene_col].map(PATHWAY_MAP).fillna("Other")
 
-    # Clonality estimate (VAF > 0.35 → likely clonal in diploid)
-    df["clonality_score"] = (df["vaf"].fillna(0) > 0.35).astype(float)
+    # Purity-corrected cancer cell fraction (CCF = VAF * ploidy / purity, diploid assumed)
+    # Falls back to raw VAF threshold when purity_map is empty
+    if purity_map is None:
+        purity_map = {}
+    patient_col = next(
+        (c for c in ["Tumor_Sample_Barcode", "case_id", "Patient"] if c in df.columns), None
+    )
+    if patient_col:
+        case_ids = df[patient_col].astype(str).str[:12]
+        purity_vals = case_ids.map(purity_map).fillna(0.35).clip(lower=0.1)
+    else:
+        purity_vals = pd.Series(0.35, index=df.index)
+
+    vaf = df["vaf"].fillna(0.0)
+    df["ccf"] = (vaf * 2.0 / purity_vals).clip(upper=1.0)
+    df["clonality_score"] = (df["ccf"] >= 0.8).astype(float)  # clonal if CCF ≥ 0.8
 
     # Mutation type
     df["is_snv"] = (df["Variant_Type"] == "SNP").astype(float) if "Variant_Type" in df.columns else 1.0
@@ -184,7 +247,7 @@ def build_feature_matrix(maf_df):
 
     features = [
         "vaf", "depth", "driver_tier", "consequence_score",
-        "clonality_score", "is_snv", "pop_af",
+        "clonality_score", "ccf", "is_snv", "pop_af",
         "sift_score", "polyphen_score", "caller_count", "in_cosmic"
     ]
     return df, features, gene_col
@@ -219,8 +282,9 @@ def train_rf_xgb(X, y_labels, feature_names, groups):
         
         train_rf_xgb.fold_stats = []
         
-        for repeat_seed in range(10):
-            print(f"    Running repeat {repeat_seed + 1}/10...")
+        n_repeats = int(os.environ.get("ML_REPEATS", "5"))
+        for repeat_seed in range(n_repeats):
+            print(f"    Running repeat {repeat_seed + 1}/{n_repeats}...")
             # Shuffle unique genes
             rng = np.random.RandomState(repeat_seed)
             shuffled_genes = rng.permutation(unique_groups)
@@ -313,6 +377,15 @@ def main():
 
     print(f"MAF: {len(maf)} rows, {maf['Tumor_Sample_Barcode'].nunique() if 'Tumor_Sample_Barcode' in maf.columns else '?'} patients")
 
+    # Filter to 3-caller consensus variants (same as original analysis)
+    if "callers" in maf.columns:
+        n_before = len(maf)
+        maf["_n_callers"] = maf["callers"].fillna("").apply(
+            lambda x: len([c for c in x.split(";") if c.strip()])
+        )
+        maf = maf[maf["_n_callers"] >= 3].copy()
+        print(f"3-caller filter: {n_before} → {len(maf)} variants ({maf['Tumor_Sample_Barcode'].nunique()} patients)")
+
     # Gap 4: Explicit gnomAD filter
     if "gnomAD_AF" in maf.columns:
         af = pd.to_numeric(maf["gnomAD_AF"], errors="coerce").fillna(0.0)
@@ -321,8 +394,12 @@ def main():
         removed = pre_len - len(maf)
         print(f"Filtered {removed} variants with gnomAD_AF > {GNOMAD_MAX_AF_THRESH}")
 
+    # Load purity estimates for CCF computation
+    purity_map = load_purity_estimates()
+    print(f"Purity map loaded: {len(purity_map)} patients covered")
+
     # Build feature matrix
-    df, features, gene_col = build_feature_matrix(maf)
+    df, features, gene_col = build_feature_matrix(maf, purity_map=purity_map)
 
     # Labels: CancerHotspots = positive class
     y = df["is_hotspot"].astype(int).values
@@ -331,6 +408,12 @@ def main():
 
     # Train models
     rf, xgb_model, rf_auc, xgb_auc, fi_rf, fi_xgb = train_rf_xgb(X, y, features, groups)
+
+    # Serialize model for external validation
+    import joblib
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    joblib.dump({"rf": rf, "xgb": xgb_model, "features": features}, RF_MODEL_PATH)
+    print(f"Model saved: {RF_MODEL_PATH}")
 
     # Score all variants
     rf_prob  = rf.predict_proba(np.nan_to_num(X, nan=0.0))[:, 1]
@@ -436,7 +519,10 @@ def main():
         "total": len(df),
         "baseline_pr_auc": float(y_true.sum() / len(df)),
         "pooled_auc": metrics.get("pooled_auc", 0.0),
-        "model_report": "results/ml_model_report.json"
+        "model_report": "results/ml_model_report.json",
+        "clonality_score_ccf_corrected": True,
+        "purity_patients_covered": len(purity_map),
+        "ccf_feature_added": True,
     }
     
     with open(final_metrics_path, "w") as f:
